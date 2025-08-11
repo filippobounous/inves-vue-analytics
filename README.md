@@ -1,73 +1,235 @@
-# Welcome to your Lovable project
 
-## Project info
+# Investment Analytics Dashboard
 
-**URL**: https://lovable.dev/projects/46e89049-18b6-495e-ba69-da339b8d696d
+A sophisticated, responsive investment analytics dashboard that connects to a FastAPI backend for comprehensive portfolio and security analysis.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+### 🔍 Entity Management
+- **Portfolio & Security Browser**: Add and manage multiple portfolios and securities
+- **Real-time Validation**: Instant feedback on entity existence via backend API calls
+- **Interactive Selection**: Easy-to-use interface with visual badges and removal options
 
-**Use Lovable**
+### 📈 Analytics & Visualization
+- **Price History**: Interactive line charts showing historical price movements
+- **Returns Analysis**: Configurable return calculations with logarithmic options
+- **Volatility Modeling**: Multiple volatility models (Simple, GARCH, EWMA)
+- **Correlation Matrix**: Interactive heatmap with multiple correlation methods
+- **Performance Metrics**: Comprehensive risk-adjusted performance indicators
+- **Value-at-Risk (VaR)**: Multiple VaR calculation methods with confidence levels
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/46e89049-18b6-495e-ba69-da339b8d696d) and start prompting.
+### 🎨 Modern UI/UX
+- **Dark/Light Theme Toggle**: Professional financial interface optimized for data analysis
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
+- **Glass Morphism**: Modern visual effects with backdrop blur and transparency
+- **Animated Transitions**: Smooth state changes and loading indicators
+- **Professional Typography**: Optimized for financial data display
 
-Changes made via Lovable will be committed automatically to this repo.
+## Technology Stack
 
-**Use your preferred IDE**
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: Tailwind CSS with custom design system
+- **Charts**: Recharts for interactive data visualization
+- **UI Components**: shadcn/ui component library
+- **State Management**: React hooks with real-time API integration
+- **API Integration**: RESTful API service with TypeScript interfaces
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Quick Start
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
+- Node.js 18+ and npm
+- FastAPI backend running (see backend setup below)
 
-Follow these steps:
+### Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. **Clone and install**:
+   ```bash
+   git clone <repository-url>
+   cd investment-analytics-dashboard
+   npm install
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. **Environment Setup**:
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` and configure:
+   ```env
+   VITE_INVESTMENT_API_URL=http://localhost:8000
+   VITE_FASTAPI_INVESTMENT_API_KEY=your_api_key_here
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3. **Start the dashboard**:
+   ```bash
+   npm run dev
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### Backend Setup
+
+1. **Start the FastAPI backend**:
+   ```bash
+   cd /workspace/fbinv
+   uvicorn api.investment.main:app --host 0.0.0.0 --port 8000 --reload
+   ```
+
+2. **Verify API connection**:
+   - Dashboard will show connection status in the footer
+   - Test with a sample portfolio or security code
+
+## API Integration
+
+The dashboard connects to these FastAPI endpoints:
+
+### Core Endpoints
+- `GET /core/portfolio/{code}` - Get portfolio metadata
+- `GET /core/security/{code}` - Get security metadata
+- `POST /core/portfolio` - Bulk portfolio lookup
+- `POST /core/security` - Bulk security lookup
+
+### Analytics Endpoints
+- `POST /analytics/prices` - Historical price data
+- `POST /analytics/returns` - Return calculations
+- `POST /analytics/realised-volatility` - Volatility modeling
+- `POST /analytics/correlations` - Correlation analysis
+- `POST /analytics/metrics` - Performance metrics
+- `POST /analytics/var` - Value-at-Risk calculations
+
+All requests automatically include the `X-API-Key` header using the configured API key.
+
+## Dashboard Sections
+
+### 1. Overview Tab
+- Combined price and returns visualization
+- Quick insights panel
+- Summary statistics
+
+### 2. Prices & Returns Tab
+- Detailed price history charts
+- Configurable return analysis
+- Rolling window calculations
+- Logarithmic return options
+
+### 3. Volatility Tab
+- Realised volatility time series
+- Multiple volatility models
+- Configurable window sizes
+- Model comparison tools
+
+### 4. Correlations Tab
+- Interactive correlation heatmap
+- Multiple correlation methods (Pearson, Spearman, Kendall)
+- Configurable parameters
+- Color-coded correlation strength
+
+### 5. Risk Metrics Tab
+- Performance metrics for each entity
+- Sharpe ratio, Alpha, Beta calculations
+- Maximum drawdown analysis
+- Risk-adjusted returns
+
+### 6. VaR Analysis Tab
+- Value-at-Risk calculations
+- Multiple confidence levels (90%, 95%, 99%)
+- Various methods (Historical, Parametric, Monte Carlo)
+- Risk severity indicators
+
+## Customization
+
+### Design System
+The dashboard uses a comprehensive design system defined in `src/index.css`:
+- **Colors**: Professional financial color palette with semantic tokens
+- **Typography**: Optimized for numerical data display
+- **Animations**: Smooth transitions and loading states
+- **Glass Effects**: Modern transparency and blur effects
+
+### API Configuration
+Modify `src/services/api.ts` to:
+- Add new endpoints
+- Customize request/response handling
+- Implement caching strategies
+- Add error recovery mechanisms
+
+### Chart Customization
+Charts are built with Recharts and can be customized in component files:
+- Color schemes in the design system
+- Chart types and interactions
+- Tooltip formatting
+- Legend configurations
+
+## Development
+
+### Project Structure
+```
+src/
+├── components/           # Reusable UI components
+│   ├── ui/              # shadcn/ui components
+│   ├── EntitySelector.tsx
+│   ├── PriceChart.tsx
+│   └── ...
+├── services/            # API integration
+│   └── api.ts
+├── pages/               # Main pages
+│   └── Index.tsx
+├── hooks/               # Custom React hooks
+└── lib/                 # Utilities
 ```
 
-**Edit a file directly in GitHub**
+### Available Scripts
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Contributing
+1. Follow the established design system
+2. Use TypeScript for all new code
+3. Add proper error handling
+4. Include loading states
+5. Test with actual backend data
 
-**Use GitHub Codespaces**
+## Deployment
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Production Build
+```bash
+npm run build
+```
 
-## What technologies are used for this project?
+### Environment Variables
+Ensure production environment has:
+- `VITE_INVESTMENT_API_URL` - Production API URL
+- `VITE_FASTAPI_INVESTMENT_API_KEY` - Production API key
 
-This project is built with:
+### Backend Considerations
+- Ensure FastAPI backend is accessible from frontend domain
+- Configure CORS settings appropriately
+- Set up proper authentication and rate limiting
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Troubleshooting
 
-## How can I deploy this project?
+### Common Issues
 
-Simply open [Lovable](https://lovable.dev/projects/46e89049-18b6-495e-ba69-da339b8d696d) and click on Share -> Publish.
+1. **API Connection Failed**:
+   - Verify backend is running on correct port
+   - Check API key configuration
+   - Ensure CORS is configured properly
 
-## Can I connect a custom domain to my Lovable project?
+2. **Charts Not Displaying**:
+   - Check browser console for errors
+   - Verify data format from API
+   - Ensure Recharts components are properly imported
 
-Yes, you can!
+3. **Styling Issues**:
+   - Verify Tailwind CSS is building correctly
+   - Check for design system token usage
+   - Ensure all custom CSS variables are defined
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Performance Optimization
+- API responses are cached automatically
+- Charts use responsive containers
+- Loading states prevent UI blocking
+- Error boundaries catch rendering issues
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## License
+
+This project is part of the FastAPI investment backend integration and follows the same licensing terms.
