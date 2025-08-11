@@ -77,6 +77,22 @@ A sophisticated, responsive investment analytics dashboard that connects to a Fa
    - Dashboard will show connection status in the footer
    - Test with a sample portfolio or security code
 
+## Docker
+
+### Production
+1. Ensure `.env` is configured.
+2. Build and run the container:
+   ```bash
+   docker compose up --build
+   ```
+   The dashboard will be available at http://localhost:5173.
+
+### Development
+Use the dev compose file for hot reloading:
+```bash
+   docker compose -f docker-compose.dev.yml up --build
+```
+
 ## API Integration
 
 The dashboard connects to these FastAPI endpoints:
