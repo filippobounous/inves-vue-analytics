@@ -4,13 +4,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { EntitySelector } from "@/components/EntitySelector";
-import { PriceChart } from "@/components/PriceChart";
-import { ReturnsChart } from "@/components/ReturnsChart";
-import { VolatilityChart } from "@/components/VolatilityChart";
+import { MultiSeriesChart } from "@/components/MultiSeriesChart";
+import { ComparisonAnalysis } from "@/components/ComparisonAnalysis";
 import { CorrelationHeatmap } from "@/components/CorrelationHeatmap";
 import { MetricsPanel } from "@/components/MetricsPanel";
 import { VarPanel } from "@/components/VarPanel";
-import { TrendingUp, BarChart3, Activity, Network, Target, AlertTriangle } from "lucide-react";
+import { TrendingUp, Network, Activity, Target, AlertTriangle, BarChart3 } from "lucide-react";
 
 const Index = () => {
   const [selectedPortfolios, setSelectedPortfolios] = useState<string[]>([]);
@@ -36,7 +35,7 @@ const Index = () => {
                   <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                     Investment Analytics
                   </h1>
-                  <p className="text-xs text-muted-foreground">Professional Portfolio Analysis</p>
+                  <p className="text-xs text-muted-foreground">Integrated Multi-Series Analysis</p>
                 </div>
               </div>
             </div>
@@ -61,19 +60,15 @@ const Index = () => {
         <EntitySelector onSelectionChange={handleSelectionChange} />
 
         {/* Main Analytics Dashboard */}
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
+        <Tabs defaultValue="multiseries" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
+            <TabsTrigger value="multiseries" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              Overview
+              Multi-Series
             </TabsTrigger>
-            <TabsTrigger value="prices" className="flex items-center gap-2">
+            <TabsTrigger value="comparison" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              Prices & Returns
-            </TabsTrigger>
-            <TabsTrigger value="volatility" className="flex items-center gap-2">
-              <Activity className="h-4 w-4" />
-              Volatility
+              Comparison
             </TabsTrigger>
             <TabsTrigger value="correlations" className="flex items-center gap-2">
               <Network className="h-4 w-4" />
@@ -89,41 +84,35 @@ const Index = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <PriceChart 
-                portfolioCodes={selectedPortfolios} 
-                securityCodes={selectedSecurities} 
-              />
-              <ReturnsChart 
-                portfolioCodes={selectedPortfolios} 
-                securityCodes={selectedSecurities} 
-              />
-            </div>
+          <TabsContent value="multiseries" className="space-y-6">
+            <MultiSeriesChart 
+              portfolioCodes={selectedPortfolios} 
+              securityCodes={selectedSecurities} 
+            />
             
             {(selectedPortfolios.length > 0 || selectedSecurities.length > 0) && (
               <Card className="glass">
                 <CardHeader>
-                  <CardTitle className="text-center text-primary">Quick Insights</CardTitle>
+                  <CardTitle className="text-center text-primary">Multi-Series Analysis</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                     <div className="p-4 rounded-lg bg-card/50">
-                      <h3 className="font-semibold text-chart-1">Price Analysis</h3>
+                      <h3 className="font-semibold text-chart-1">Normalized Views</h3>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Historical price movements and trends for your selected assets
+                        Compare different data series on the same scale to identify trends and correlations
                       </p>
                     </div>
                     <div className="p-4 rounded-lg bg-card/50">
-                      <h3 className="font-semibold text-chart-2">Return Distribution</h3>
+                      <h3 className="font-semibold text-chart-2">Time Series Overlay</h3>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Daily and rolling return patterns with configurable windows
+                        Plot prices, returns, and volatility together to understand relationships
                       </p>
                     </div>
                     <div className="p-4 rounded-lg bg-card/50">
-                      <h3 className="font-semibold text-chart-3">Risk Assessment</h3>
+                      <h3 className="font-semibold text-chart-3">Dynamic Analysis</h3>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Comprehensive risk metrics including VaR and volatility
+                        Toggle different series and normalization options for flexible analysis
                       </p>
                     </div>
                   </div>
@@ -132,19 +121,8 @@ const Index = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="prices" className="space-y-6">
-            <PriceChart 
-              portfolioCodes={selectedPortfolios} 
-              securityCodes={selectedSecurities} 
-            />
-            <ReturnsChart 
-              portfolioCodes={selectedPortfolios} 
-              securityCodes={selectedSecurities} 
-            />
-          </TabsContent>
-
-          <TabsContent value="volatility">
-            <VolatilityChart 
+          <TabsContent value="comparison">
+            <ComparisonAnalysis 
               portfolioCodes={selectedPortfolios} 
               securityCodes={selectedSecurities} 
             />
@@ -176,15 +154,15 @@ const Index = () => {
         <Card className="glass mt-8">
           <CardContent className="p-4 text-center">
             <p className="text-sm text-muted-foreground">
-              Investment Analytics Dashboard • Connected to FastAPI Backend • 
-              <span className="text-primary ml-1">Real-time Financial Data Analysis</span>
+              Investment Analytics Dashboard • Integrated Multi-Series Analysis • 
+              <span className="text-primary ml-1">Real-time Cross-Asset Insights</span>
             </p>
             <div className="flex justify-center space-x-4 mt-2 text-xs text-muted-foreground">
               <span>API: {import.meta.env.VITE_INVESTMENT_API_URL || 'http://localhost:8000'}</span>
               <span>•</span>
-              <span>Recharts Visualization</span>
+              <span>Normalized Analytics</span>
               <span>•</span>
-              <span>Professional Risk Analytics</span>
+              <span>Cross-Series Correlation</span>
             </div>
           </CardContent>
         </Card>
