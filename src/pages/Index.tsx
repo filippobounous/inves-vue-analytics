@@ -1,7 +1,8 @@
-
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { EntitySelector } from "@/components/EntitySelector";
 import { MultiSeriesChart } from "@/components/MultiSeriesChart";
@@ -9,7 +10,7 @@ import { ComparisonAnalysis } from "@/components/ComparisonAnalysis";
 import { CorrelationHeatmap } from "@/components/CorrelationHeatmap";
 import { MetricsPanel } from "@/components/MetricsPanel";
 import { VarPanel } from "@/components/VarPanel";
-import { TrendingUp, Network, Activity, Target, AlertTriangle, BarChart3 } from "lucide-react";
+import { TrendingUp, Network, Activity, Target, AlertTriangle, BarChart3, Settings } from "lucide-react";
 
 const Index = () => {
   const [selectedPortfolios, setSelectedPortfolios] = useState<string[]>([]);
@@ -28,14 +29,14 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-primary-foreground" />
+                <div className="h-8 w-8 bg-muted rounded-lg flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-foreground" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                    Investment Analytics
+                  <h1 className="text-xl font-bold text-foreground">
+                    Murgenere
                   </h1>
-                  <p className="text-xs text-muted-foreground">Integrated Multi-Series Analysis</p>
+                  <p className="text-xs text-muted-foreground">Multi-Series Investment Analytics</p>
                 </div>
               </div>
             </div>
@@ -49,6 +50,12 @@ const Index = () => {
                   {selectedPortfolios.length} Portfolios • {selectedSecurities.length} Securities
                 </p>
               </div>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/settings" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Link>
+              </Button>
               <ThemeToggle />
             </div>
           </div>
@@ -154,7 +161,7 @@ const Index = () => {
         <Card className="glass mt-8">
           <CardContent className="p-4 text-center">
             <p className="text-sm text-muted-foreground">
-              Investment Analytics Dashboard • Integrated Multi-Series Analysis • 
+              Murgenere • Multi-Series Investment Analytics • 
               <span className="text-primary ml-1">Real-time Cross-Asset Insights</span>
             </p>
             <div className="flex justify-center space-x-4 mt-2 text-xs text-muted-foreground">
