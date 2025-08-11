@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -52,7 +51,10 @@ export function ComparisonAnalysis({ portfolioCodes, securityCodes }: Comparison
       ]);
 
       if (xData.success && yData.success && xData.data && yData.data) {
-        const combinedData = combineAnalysisData(xData.data, yData.data);
+        // Ensure data is an array before passing to combineAnalysisData
+        const xDataArray = Array.isArray(xData.data) ? xData.data : [];
+        const yDataArray = Array.isArray(yData.data) ? yData.data : [];
+        const combinedData = combineAnalysisData(xDataArray, yDataArray);
         setData(combinedData);
       } else {
         setError('Failed to fetch comparison data');
