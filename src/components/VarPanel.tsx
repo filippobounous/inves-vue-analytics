@@ -182,7 +182,7 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
         </Button>
 
         {error ? (
-          <div className="flex items-center justify-center h-32">
+          <div className="flex items-center justify-center h-64">
             <p className="text-destructive">{error}</p>
           </div>
         ) : (
