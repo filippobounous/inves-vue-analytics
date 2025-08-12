@@ -1,5 +1,5 @@
-
-const API_BASE_URL = import.meta.env.VITE_INVESTMENT_API_URL || 'http://localhost:8000';
+const API_BASE_URL =
+  import.meta.env.VITE_INVESTMENT_API_URL || 'http://localhost:8000';
 const API_KEY = import.meta.env.VITE_FASTAPI_INVESTMENT_API_KEY || '';
 
 export interface ApiResponse<T> {
@@ -11,7 +11,7 @@ export interface ApiResponse<T> {
 class InvestmentApiService {
   private async makeRequest<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -39,7 +39,8 @@ class InvestmentApiService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
