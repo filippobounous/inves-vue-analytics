@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface SettingsContextType {
@@ -6,23 +5,25 @@ export interface SettingsContextType {
   defaultCurrency: string;
   dateFormat: string;
   chartTheme: 'auto' | 'light' | 'dark';
-  
+
   // Data preferences
   defaultDateRange: number; // days
   autoRefreshInterval: number; // seconds
   showTooltips: boolean;
-  
+
   // API preferences
   useTestData: boolean;
   apiTimeout: number; // seconds
-  
+
   // Chart preferences
   defaultChartType: 'line' | 'area' | 'candlestick';
   showGrid: boolean;
   showLegend: boolean;
-  
+
   // Update functions
-  updateSettings: (settings: Partial<Omit<SettingsContextType, 'updateSettings'>>) => void;
+  updateSettings: (
+    settings: Partial<Omit<SettingsContextType, 'updateSettings'>>,
+  ) => void;
 }
 
 const defaultSettings: Omit<SettingsContextType, 'updateSettings'> = {
@@ -39,10 +40,13 @@ const defaultSettings: Omit<SettingsContextType, 'updateSettings'> = {
   showLegend: true,
 };
 
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+const SettingsContext = createContext<SettingsContextType | undefined>(
+  undefined,
+);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<Omit<SettingsContextType, 'updateSettings'>>(defaultSettings);
+  const [settings, setSettings] =
+    useState<Omit<SettingsContextType, 'updateSettings'>>(defaultSettings);
 
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -57,7 +61,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const updateSettings = (newSettings: Partial<Omit<SettingsContextType, 'updateSettings'>>) => {
+  const updateSettings = (
+    newSettings: Partial<Omit<SettingsContextType, 'updateSettings'>>,
+  ) => {
     const updatedSettings = { ...settings, ...newSettings };
     setSettings(updatedSettings);
     localStorage.setItem('murgenere-settings', JSON.stringify(updatedSettings));

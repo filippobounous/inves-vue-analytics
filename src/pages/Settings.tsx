@@ -1,15 +1,20 @@
-
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { useSettings } from "@/contexts/SettingsContext";
-import { useToast } from "@/hooks/use-toast";
-import { Settings as SettingsIcon, Save, RotateCcw } from "lucide-react";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { useSettings } from '@/contexts/SettingsContext';
+import { useToast } from '@/hooks/use-toast';
+import { Settings as SettingsIcon, Save, RotateCcw } from 'lucide-react';
 
 const Settings = () => {
   const { toast } = useToast();
@@ -19,8 +24,8 @@ const Settings = () => {
   const handleSave = () => {
     settings.updateSettings(tempSettings);
     toast({
-      title: "Settings saved",
-      description: "Your preferences have been updated successfully.",
+      title: 'Settings saved',
+      description: 'Your preferences have been updated successfully.',
     });
   };
 
@@ -40,8 +45,8 @@ const Settings = () => {
     };
     setTempSettings(defaultSettings);
     toast({
-      title: "Settings reset",
-      description: "All settings have been reset to default values.",
+      title: 'Settings reset',
+      description: 'All settings have been reset to default values.',
     });
   };
 
@@ -56,7 +61,9 @@ const Settings = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold">Settings</h1>
-                <p className="text-xs text-muted-foreground">Configure your preferences</p>
+                <p className="text-xs text-muted-foreground">
+                  Configure your preferences
+                </p>
               </div>
             </div>
           </div>
@@ -73,9 +80,11 @@ const Settings = () => {
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="currency">Default Currency</Label>
-                <Select 
-                  value={tempSettings.defaultCurrency} 
-                  onValueChange={(value) => setTempSettings({...tempSettings, defaultCurrency: value})}
+                <Select
+                  value={tempSettings.defaultCurrency}
+                  onValueChange={(value) =>
+                    setTempSettings({ ...tempSettings, defaultCurrency: value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -91,10 +100,10 @@ const Settings = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="chart-theme">Chart Theme</Label>
-                <Select 
-                  value={tempSettings.chartTheme} 
-                  onValueChange={(value: 'auto' | 'light' | 'dark') => 
-                    setTempSettings({...tempSettings, chartTheme: value})
+                <Select
+                  value={tempSettings.chartTheme}
+                  onValueChange={(value: 'auto' | 'light' | 'dark') =>
+                    setTempSettings({ ...tempSettings, chartTheme: value })
                   }
                 >
                   <SelectTrigger>
@@ -113,8 +122,8 @@ const Settings = () => {
                 <Switch
                   id="tooltips"
                   checked={tempSettings.showTooltips}
-                  onCheckedChange={(checked) => 
-                    setTempSettings({...tempSettings, showTooltips: checked})
+                  onCheckedChange={(checked) =>
+                    setTempSettings({ ...tempSettings, showTooltips: checked })
                   }
                 />
               </div>
@@ -128,11 +137,16 @@ const Settings = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label>Default Date Range: {tempSettings.defaultDateRange} days</Label>
+                <Label>
+                  Default Date Range: {tempSettings.defaultDateRange} days
+                </Label>
                 <Slider
                   value={[tempSettings.defaultDateRange]}
-                  onValueChange={([value]) => 
-                    setTempSettings({...tempSettings, defaultDateRange: value})
+                  onValueChange={([value]) =>
+                    setTempSettings({
+                      ...tempSettings,
+                      defaultDateRange: value,
+                    })
                   }
                   max={1000}
                   min={30}
@@ -142,11 +156,16 @@ const Settings = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Auto Refresh: {tempSettings.autoRefreshInterval} seconds</Label>
+                <Label>
+                  Auto Refresh: {tempSettings.autoRefreshInterval} seconds
+                </Label>
                 <Slider
                   value={[tempSettings.autoRefreshInterval]}
-                  onValueChange={([value]) => 
-                    setTempSettings({...tempSettings, autoRefreshInterval: value})
+                  onValueChange={([value]) =>
+                    setTempSettings({
+                      ...tempSettings,
+                      autoRefreshInterval: value,
+                    })
                   }
                   max={3600}
                   min={30}
@@ -160,8 +179,8 @@ const Settings = () => {
                 <Switch
                   id="test-data"
                   checked={tempSettings.useTestData}
-                  onCheckedChange={(checked) => 
-                    setTempSettings({...tempSettings, useTestData: checked})
+                  onCheckedChange={(checked) =>
+                    setTempSettings({ ...tempSettings, useTestData: checked })
                   }
                 />
               </div>
@@ -176,10 +195,13 @@ const Settings = () => {
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="chart-type">Default Chart Type</Label>
-                <Select 
-                  value={tempSettings.defaultChartType} 
-                  onValueChange={(value: 'line' | 'area' | 'candlestick') => 
-                    setTempSettings({...tempSettings, defaultChartType: value})
+                <Select
+                  value={tempSettings.defaultChartType}
+                  onValueChange={(value: 'line' | 'area' | 'candlestick') =>
+                    setTempSettings({
+                      ...tempSettings,
+                      defaultChartType: value,
+                    })
                   }
                 >
                   <SelectTrigger>
@@ -188,7 +210,9 @@ const Settings = () => {
                   <SelectContent>
                     <SelectItem value="line">Line Chart</SelectItem>
                     <SelectItem value="area">Area Chart</SelectItem>
-                    <SelectItem value="candlestick">Candlestick Chart</SelectItem>
+                    <SelectItem value="candlestick">
+                      Candlestick Chart
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -198,8 +222,8 @@ const Settings = () => {
                 <Switch
                   id="grid"
                   checked={tempSettings.showGrid}
-                  onCheckedChange={(checked) => 
-                    setTempSettings({...tempSettings, showGrid: checked})
+                  onCheckedChange={(checked) =>
+                    setTempSettings({ ...tempSettings, showGrid: checked })
                   }
                 />
               </div>
@@ -209,8 +233,8 @@ const Settings = () => {
                 <Switch
                   id="legend"
                   checked={tempSettings.showLegend}
-                  onCheckedChange={(checked) => 
-                    setTempSettings({...tempSettings, showLegend: checked})
+                  onCheckedChange={(checked) =>
+                    setTempSettings({ ...tempSettings, showLegend: checked })
                   }
                 />
               </div>
@@ -227,8 +251,8 @@ const Settings = () => {
                 <Label>API Timeout: {tempSettings.apiTimeout} seconds</Label>
                 <Slider
                   value={[tempSettings.apiTimeout]}
-                  onValueChange={([value]) => 
-                    setTempSettings({...tempSettings, apiTimeout: value})
+                  onValueChange={([value]) =>
+                    setTempSettings({ ...tempSettings, apiTimeout: value })
                   }
                   max={120}
                   min={5}
@@ -239,7 +263,8 @@ const Settings = () => {
 
               <div className="p-4 bg-muted rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  API Endpoint: {import.meta.env.VITE_API_URL || 'http://localhost:8000'}
+                  API Endpoint:{' '}
+                  {import.meta.env.VITE_API_URL || 'http://localhost:8000'}
                 </p>
               </div>
             </CardContent>
@@ -250,11 +275,15 @@ const Settings = () => {
 
         {/* Actions */}
         <div className="flex justify-between">
-          <Button variant="outline" onClick={handleReset} className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleReset}
+            className="flex items-center gap-2"
+          >
             <RotateCcw className="h-4 w-4" />
             Reset to Defaults
           </Button>
-          
+
           <Button onClick={handleSave} className="flex items-center gap-2">
             <Save className="h-4 w-4" />
             Save Settings

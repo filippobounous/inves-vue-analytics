@@ -1,9 +1,17 @@
-
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { TrendingUp, Loader2 } from "lucide-react";
-import { investmentApi } from "@/services/api";
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
+import { TrendingUp, Loader2 } from 'lucide-react';
+import { investmentApi } from '@/services/api';
 
 interface PriceChartProps {
   portfolioCodes: string[];
@@ -39,7 +47,7 @@ export function PriceChart({ portfolioCodes, securityCodes }: PriceChartProps) {
         const chartData = transformPriceData(response.data);
         setData(chartData);
       } else {
-        setError(response.error || "Failed to fetch price data");
+        setError(response.error || 'Failed to fetch price data');
       }
     };
 
@@ -54,19 +62,32 @@ export function PriceChart({ portfolioCodes, securityCodes }: PriceChartProps) {
 
     return apiData.map((item: any, index: number) => ({
       date: item.date || `Day ${index + 1}`,
-      ...portfolioCodes.reduce((acc, code) => ({
-        ...acc,
-        [code]: item[code] || Math.random() * 1000 + 100
-      }), {}),
-      ...securityCodes.reduce((acc, code) => ({
-        ...acc,
-        [code]: item[code] || Math.random() * 200 + 50
-      }), {}),
+      ...portfolioCodes.reduce(
+        (acc, code) => ({
+          ...acc,
+          [code]: item[code] || Math.random() * 1000 + 100,
+        }),
+        {},
+      ),
+      ...securityCodes.reduce(
+        (acc, code) => ({
+          ...acc,
+          [code]: item[code] || Math.random() * 200 + 50,
+        }),
+        {},
+      ),
     }));
   };
 
   const getLineColor = (index: number) => {
-    const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', 'hsl(var(--chart-6))'];
+    const colors = [
+      'hsl(var(--chart-1))',
+      'hsl(var(--chart-2))',
+      'hsl(var(--chart-3))',
+      'hsl(var(--chart-4))',
+      'hsl(var(--chart-5))',
+      'hsl(var(--chart-6))',
+    ];
     return colors[index % colors.length];
   };
 
@@ -80,7 +101,9 @@ export function PriceChart({ portfolioCodes, securityCodes }: PriceChartProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Select portfolios or securities to view price history</p>
+          <p className="text-muted-foreground">
+            Select portfolios or securities to view price history
+          </p>
         </CardContent>
       </Card>
     );
@@ -105,22 +128,25 @@ export function PriceChart({ portfolioCodes, securityCodes }: PriceChartProps) {
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis 
-                dataKey="date" 
+            <LineChart
+              data={data}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--border))"
+              />
+              <XAxis
+                dataKey="date"
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
               />
-              <YAxis 
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-              />
-              <Tooltip 
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <Tooltip
                 contentStyle={{
                   backgroundColor: 'hsl(var(--card))',
                   border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
+                  borderRadius: '8px',
                 }}
               />
               <Legend />

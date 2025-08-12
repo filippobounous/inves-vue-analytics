@@ -1,30 +1,38 @@
-
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Network, Loader2 } from "lucide-react";
-import { investmentApi } from "@/services/api";
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Network, Loader2 } from 'lucide-react';
+import { investmentApi } from '@/services/api';
 
 interface CorrelationHeatmapProps {
   portfolioCodes: string[];
   securityCodes: string[];
 }
 
-export function CorrelationHeatmap({ portfolioCodes, securityCodes }: CorrelationHeatmapProps) {
+export function CorrelationHeatmap({
+  portfolioCodes,
+  securityCodes,
+}: CorrelationHeatmapProps) {
   const [correlationMatrix, setCorrelationMatrix] = useState<number[][]>([]);
   const [labels, setLabels] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Parameters
   const [useReturns, setUseReturns] = useState(true);
   const [logReturns, setLogReturns] = useState(false);
   const [retWinSize, setRetWinSize] = useState(30);
-  const [corrModel, setCorrModel] = useState("pearson");
+  const [corrModel, setCorrModel] = useState('pearson');
   const [window, setWindow] = useState(252);
   const [lag, setLag] = useState(0);
 
@@ -56,26 +64,32 @@ export function CorrelationHeatmap({ portfolioCodes, securityCodes }: Correlatio
     setLoading(false);
 
     if (response.success && response.data) {
-      const { matrix, labels: responseLabels } = transformCorrelationData(response.data);
+      const { matrix, labels: responseLabels } = transformCorrelationData(
+        response.data,
+      );
       setCorrelationMatrix(matrix);
       setLabels(responseLabels);
     } else {
-      setError(response.error || "Failed to fetch correlation data");
+      setError(response.error || 'Failed to fetch correlation data');
     }
   };
 
   const transformCorrelationData = (apiData: any) => {
     const allCodes = [...portfolioCodes, ...securityCodes];
-    
+
     // Generate sample correlation matrix if API data is not in expected format
     if (!apiData || !apiData.matrix) {
       const size = allCodes.length;
-      const matrix = Array(size).fill(null).map((_, i) =>
-        Array(size).fill(null).map((_, j) => {
-          if (i === j) return 1;
-          return Math.random() * 2 - 1; // Random correlation between -1 and 1
-        })
-      );
+      const matrix = Array(size)
+        .fill(null)
+        .map((_, i) =>
+          Array(size)
+            .fill(null)
+            .map((_, j) => {
+              if (i === j) return 1;
+              return Math.random() * 2 - 1; // Random correlation between -1 and 1
+            }),
+        );
       return { matrix, labels: allCodes };
     }
 
@@ -106,7 +120,9 @@ export function CorrelationHeatmap({ portfolioCodes, securityCodes }: Correlatio
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Select portfolios or securities to view correlation matrix</p>
+          <p className="text-muted-foreground">
+            Select portfolios or securities to view correlation matrix
+          </p>
         </CardContent>
       </Card>
     );
@@ -208,7 +224,10 @@ export function CorrelationHeatmap({ portfolioCodes, securityCodes }: Correlatio
                   <tr>
                     <th className="w-20"></th>
                     {labels.map((label) => (
-                      <th key={label} className="w-20 p-2 text-xs font-medium text-center border border-border">
+                      <th
+                        key={label}
+                        className="w-20 p-2 text-xs font-medium text-center border border-border"
+                      >
                         {label}
                       </th>
                     ))}
@@ -233,7 +252,7 @@ export function CorrelationHeatmap({ portfolioCodes, securityCodes }: Correlatio
                 </tbody>
               </table>
             </div>
-            
+
             {/* Color scale legend */}
             <div className="mt-4 flex items-center justify-center space-x-2">
               <span className="text-xs text-muted-foreground">-1.0</span>

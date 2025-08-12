@@ -1,25 +1,25 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Plus, X, Search, Building, TrendingUp } from "lucide-react";
-import { investmentApi } from "@/services/api";
-import { useToast } from "@/hooks/use-toast";
-import { useSettings } from "@/contexts/SettingsContext";
+} from '@/components/ui/select';
+import { Plus, X, Search, Building, TrendingUp } from 'lucide-react';
+import { investmentApi } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
+import { useSettings } from '@/contexts/SettingsContext';
 import {
   TEST_PORTFOLIOS,
   TEST_SECURITIES,
   type Portfolio,
   type Security,
-} from "@/services/testData";
+} from '@/services/testData';
 
 interface EntitySelectorProps {
   onSelectionChange: (portfolios: string[], securities: string[]) => void;
@@ -28,8 +28,8 @@ interface EntitySelectorProps {
 export function EntitySelector({ onSelectionChange }: EntitySelectorProps) {
   const [portfolioCodes, setPortfolioCodes] = useState<string[]>([]);
   const [securityCodes, setSecurityCodes] = useState<string[]>([]);
-  const [selectedPortfolio, setSelectedPortfolio] = useState<string>("");
-  const [selectedSecurity, setSelectedSecurity] = useState<string>("");
+  const [selectedPortfolio, setSelectedPortfolio] = useState<string>('');
+  const [selectedSecurity, setSelectedSecurity] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [availablePortfolios, setAvailablePortfolios] = useState<Portfolio[]>(
     [],
@@ -61,18 +61,18 @@ export function EntitySelector({ onSelectionChange }: EntitySelectorProps) {
 
     if (portfolioCodes.includes(selectedPortfolio)) {
       toast({
-        title: "Portfolio already added",
+        title: 'Portfolio already added',
         description: `Portfolio ${selectedPortfolio} is already in your selection.`,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return;
     }
 
     if (useTestData) {
       setPortfolioCodes([...portfolioCodes, selectedPortfolio]);
-      setSelectedPortfolio("");
+      setSelectedPortfolio('');
       toast({
-        title: "Portfolio added",
+        title: 'Portfolio added',
         description: `Portfolio ${selectedPortfolio} has been added to your selection.`,
       });
     } else {
@@ -82,18 +82,18 @@ export function EntitySelector({ onSelectionChange }: EntitySelectorProps) {
 
       if (response.success) {
         setPortfolioCodes([...portfolioCodes, selectedPortfolio]);
-        setSelectedPortfolio("");
+        setSelectedPortfolio('');
         toast({
-          title: "Portfolio added",
+          title: 'Portfolio added',
           description: `Portfolio ${selectedPortfolio} has been added to your selection.`,
         });
       } else {
         toast({
-          title: "Portfolio not found",
+          title: 'Portfolio not found',
           description:
             response.error ||
             `Portfolio ${selectedPortfolio} could not be found.`,
-          variant: "destructive",
+          variant: 'destructive',
         });
       }
     }
@@ -104,18 +104,18 @@ export function EntitySelector({ onSelectionChange }: EntitySelectorProps) {
 
     if (securityCodes.includes(selectedSecurity)) {
       toast({
-        title: "Security already added",
+        title: 'Security already added',
         description: `Security ${selectedSecurity} is already in your selection.`,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return;
     }
 
     if (useTestData) {
       setSecurityCodes([...securityCodes, selectedSecurity]);
-      setSelectedSecurity("");
+      setSelectedSecurity('');
       toast({
-        title: "Security added",
+        title: 'Security added',
         description: `Security ${selectedSecurity} has been added to your selection.`,
       });
     } else {
@@ -125,18 +125,18 @@ export function EntitySelector({ onSelectionChange }: EntitySelectorProps) {
 
       if (response.success) {
         setSecurityCodes([...securityCodes, selectedSecurity]);
-        setSelectedSecurity("");
+        setSelectedSecurity('');
         toast({
-          title: "Security added",
+          title: 'Security added',
           description: `Security ${selectedSecurity} has been added to your selection.`,
         });
       } else {
         toast({
-          title: "Security not found",
+          title: 'Security not found',
           description:
             response.error ||
             `Security ${selectedSecurity} could not be found.`,
-          variant: "destructive",
+          variant: 'destructive',
         });
       }
     }

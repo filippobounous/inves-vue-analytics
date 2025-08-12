@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { AlertTriangle, Loader2, Shield } from "lucide-react";
-import { investmentApi } from "@/services/api";
+} from '@/components/ui/select';
+import { AlertTriangle, Loader2, Shield } from 'lucide-react';
+import { investmentApi } from '@/services/api';
 
 interface VarPanelProps {
   portfolioCodes: string[];
@@ -33,7 +33,7 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
   // Parameters
   const [varWinSize, setVarWinSize] = useState(252);
   const [confidenceLevel, setConfidenceLevel] = useState(0.95);
-  const [method, setMethod] = useState("historical");
+  const [method, setMethod] = useState('historical');
 
   useEffect(() => {
     if (portfolioCodes.length === 0 && securityCodes.length === 0) {
@@ -63,7 +63,7 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
       const transformedData = transformVarData(response.data);
       setVarData(transformedData);
     } else {
-      setError(response.error || "Failed to fetch VaR data");
+      setError(response.error || 'Failed to fetch VaR data');
     }
   };
 
@@ -91,19 +91,19 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
     const absValue = Math.abs(value);
     if (absValue > 0.1) {
       return {
-        color: "text-destructive",
+        color: 'text-destructive',
         icon: AlertTriangle,
-        severity: "High Risk",
+        severity: 'High Risk',
       };
     }
     if (absValue > 0.05) {
       return {
-        color: "text-warning",
+        color: 'text-warning',
         icon: AlertTriangle,
-        severity: "Medium Risk",
+        severity: 'Medium Risk',
       };
     }
-    return { color: "text-success", icon: Shield, severity: "Low Risk" };
+    return { color: 'text-success', icon: Shield, severity: 'Low Risk' };
   };
 
   if (portfolioCodes.length === 0 && securityCodes.length === 0) {
@@ -226,7 +226,7 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
                       </div>
 
                       <div className="text-xs text-muted-foreground mt-3">
-                        Expected maximum loss with{" "}
+                        Expected maximum loss with{' '}
                         {Math.round(data.confidence_level * 100)}% confidence
                       </div>
                     </div>
