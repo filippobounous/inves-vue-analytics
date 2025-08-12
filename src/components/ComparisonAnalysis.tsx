@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ScatterChart,
   Scatter,
@@ -8,25 +8,25 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from "recharts";
-import { Network, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+} from 'recharts';
+import { Network, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { investmentApi, type ApiResponse } from "@/services/api";
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { investmentApi, type ApiResponse } from '@/services/api';
 
 interface ComparisonAnalysisProps {
   portfolioCodes: string[];
   securityCodes: string[];
 }
 
-type AnalysisType = "prices" | "returns" | "volatility";
+type AnalysisType = 'prices' | 'returns' | 'volatility';
 
 interface AnalysisSeries {
   date?: string;
@@ -47,8 +47,8 @@ export function ComparisonAnalysis({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [xAxisType, setXAxisType] = useState<AnalysisType>("prices");
-  const [yAxisType, setYAxisType] = useState<AnalysisType>("volatility");
+  const [xAxisType, setXAxisType] = useState<AnalysisType>('prices');
+  const [yAxisType, setYAxisType] = useState<AnalysisType>('volatility');
   const [selectedEntities, setSelectedEntities] = useState<string[]>([]);
 
   const allEntities = [...portfolioCodes, ...securityCodes];
@@ -87,10 +87,10 @@ export function ComparisonAnalysis({
         const combinedData = combineAnalysisData(xDataArray, yDataArray);
         setData(combinedData);
       } else {
-        setError("Failed to fetch comparison data");
+        setError('Failed to fetch comparison data');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch data");
+      setError(err instanceof Error ? err.message : 'Failed to fetch data');
     } finally {
       setLoading(false);
     }
@@ -108,22 +108,22 @@ export function ComparisonAnalysis({
     };
 
     switch (analysisType) {
-      case "prices":
+      case 'prices':
         return investmentApi.getPrices(params);
-      case "returns":
+      case 'returns':
         return investmentApi.getReturns({
           ...params,
           use_ln_ret: false,
           win_size: 30,
         });
-      case "volatility":
+      case 'volatility':
         return investmentApi.getRealisedVolatility({
           ...params,
-          rv_model: "simple",
+          rv_model: 'simple',
           rv_win_size: 30,
         });
       default:
-        return { success: false, error: "Unknown analysis type" };
+        return { success: false, error: 'Unknown analysis type' };
     }
   };
 
@@ -137,10 +137,10 @@ export function ComparisonAnalysis({
       // Calculate average values for each entity
       const xValues = xData
         .map((item) => item[entity])
-        .filter((v): v is number => typeof v === "number");
+        .filter((v): v is number => typeof v === 'number');
       const yValues = yData
         .map((item) => item[entity])
-        .filter((v): v is number => typeof v === "number");
+        .filter((v): v is number => typeof v === 'number');
 
       if (xValues.length > 0 && yValues.length > 0) {
         const avgX =
@@ -164,15 +164,15 @@ export function ComparisonAnalysis({
 
   if (allEntities.length === 0) {
     return (
-      <Card className="chart-container">
+      <Card className='chart-container'>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Network className="h-5 w-5 text-primary" />
+          <CardTitle className='flex items-center gap-2'>
+            <Network className='h-5 w-5 text-primary' />
             Comparison Analysis
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">
+        <CardContent className='flex items-center justify-center h-64'>
+          <p className='text-muted-foreground'>
             Select portfolios or securities to view comparison analysis
           </p>
         </CardContent>
@@ -181,45 +181,45 @@ export function ComparisonAnalysis({
   }
 
   return (
-    <Card className="chart-container">
+    <Card className='chart-container'>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Network className="h-5 w-5 text-primary" />
+        <CardTitle className='flex items-center gap-2'>
+          <Network className='h-5 w-5 text-primary' />
           Comparison Analysis
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex gap-4 items-end">
-          <div className="space-y-2">
+      <CardContent className='space-y-4'>
+        <div className='flex gap-4 items-end'>
+          <div className='space-y-2'>
             <Label>X-Axis</Label>
             <Select
               value={xAxisType}
               onValueChange={(value) => setXAxisType(value as AnalysisType)}
             >
-              <SelectTrigger className="w-32">
+              <SelectTrigger className='w-32'>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="prices">Prices</SelectItem>
-                <SelectItem value="returns">Returns</SelectItem>
-                <SelectItem value="volatility">Volatility</SelectItem>
+                <SelectItem value='prices'>Prices</SelectItem>
+                <SelectItem value='returns'>Returns</SelectItem>
+                <SelectItem value='volatility'>Volatility</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className='space-y-2'>
             <Label>Y-Axis</Label>
             <Select
               value={yAxisType}
               onValueChange={(value) => setYAxisType(value as AnalysisType)}
             >
-              <SelectTrigger className="w-32">
+              <SelectTrigger className='w-32'>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="prices">Prices</SelectItem>
-                <SelectItem value="returns">Returns</SelectItem>
-                <SelectItem value="volatility">Volatility</SelectItem>
+                <SelectItem value='prices'>Prices</SelectItem>
+                <SelectItem value='returns'>Returns</SelectItem>
+                <SelectItem value='volatility'>Volatility</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -230,43 +230,43 @@ export function ComparisonAnalysis({
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className='flex items-center justify-center h-64'>
+            <Loader2 className='h-8 w-8 animate-spin text-primary' />
           </div>
         ) : error ? (
-          <div className="flex items-center justify-center h-64">
-            <p className="text-destructive">{error}</p>
+          <div className='flex items-center justify-center h-64'>
+            <p className='text-destructive'>{error}</p>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width='100%' height={400}>
             <ScatterChart
               data={data}
               margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
             >
               <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="hsl(var(--border))"
+                strokeDasharray='3 3'
+                stroke='hsl(var(--border))'
               />
               <XAxis
-                type="number"
-                dataKey="x"
+                type='number'
+                dataKey='x'
                 name={xAxisType}
-                stroke="hsl(var(--muted-foreground))"
+                stroke='hsl(var(--muted-foreground))'
                 fontSize={12}
               />
               <YAxis
-                type="number"
-                dataKey="y"
+                type='number'
+                dataKey='y'
                 name={yAxisType}
-                stroke="hsl(var(--muted-foreground))"
+                stroke='hsl(var(--muted-foreground))'
                 fontSize={12}
               />
               <Tooltip
-                cursor={{ strokeDasharray: "3 3" }}
+                cursor={{ strokeDasharray: '3 3' }}
                 contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px',
                 }}
                 formatter={(value: number, name: string): [string, string] => [
                   value.toFixed(4),
@@ -283,11 +283,11 @@ export function ComparisonAnalysis({
                 }}
               />
               <Scatter
-                dataKey="y"
-                fill="hsl(var(--chart-1))"
+                dataKey='y'
+                fill='hsl(var(--chart-1))'
                 fillOpacity={0.7}
                 strokeWidth={2}
-                stroke="hsl(var(--chart-1))"
+                stroke='hsl(var(--chart-1))'
               />
             </ScatterChart>
           </ResponsiveContainer>

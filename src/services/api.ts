@@ -1,5 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-const API_KEY = import.meta.env.VITE_API_KEY || "";
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_KEY = import.meta.env.VITE_API_KEY || '';
 
 export interface ApiResponse<T> {
   data?: T;
@@ -16,8 +16,8 @@ class InvestmentApiService {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
         headers: {
-          "Content-Type": "application/json",
-          "X-API-Key": API_KEY,
+          'Content-Type': 'application/json',
+          'X-API-Key': API_KEY,
           ...options.headers,
         },
       });
@@ -39,7 +39,7 @@ class InvestmentApiService {
       return {
         success: false,
         error:
-          error instanceof Error ? error.message : "Unknown error occurred",
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -50,8 +50,8 @@ class InvestmentApiService {
   }
 
   async getPortfolios(codes: string[]) {
-    return this.makeRequest("/core/portfolio", {
-      method: "POST",
+    return this.makeRequest('/core/portfolio', {
+      method: 'POST',
       body: JSON.stringify(codes),
     });
   }
@@ -62,8 +62,8 @@ class InvestmentApiService {
   }
 
   async getSecurities(codes: string[]) {
-    return this.makeRequest("/core/security", {
-      method: "POST",
+    return this.makeRequest('/core/security', {
+      method: 'POST',
       body: JSON.stringify(codes),
     });
   }
@@ -76,8 +76,8 @@ class InvestmentApiService {
     intraday?: boolean;
     currency?: string;
   }) {
-    return this.makeRequest("/analytics/prices", {
-      method: "POST",
+    return this.makeRequest('/analytics/prices', {
+      method: 'POST',
       body: JSON.stringify(params),
     });
   }
@@ -89,8 +89,8 @@ class InvestmentApiService {
     win_size?: number;
     local_only?: boolean;
   }) {
-    return this.makeRequest("/analytics/returns", {
-      method: "POST",
+    return this.makeRequest('/analytics/returns', {
+      method: 'POST',
       body: JSON.stringify(params),
     });
   }
@@ -102,8 +102,8 @@ class InvestmentApiService {
     rv_win_size?: number;
     local_only?: boolean;
   }) {
-    return this.makeRequest("/analytics/realised-volatility", {
-      method: "POST",
+    return this.makeRequest('/analytics/realised-volatility', {
+      method: 'POST',
       body: JSON.stringify(params),
     });
   }
@@ -118,8 +118,8 @@ class InvestmentApiService {
     window?: number;
     lag?: number;
   }) {
-    return this.makeRequest("/analytics/correlations", {
-      method: "POST",
+    return this.makeRequest('/analytics/correlations', {
+      method: 'POST',
       body: JSON.stringify(params),
     });
   }
@@ -132,8 +132,8 @@ class InvestmentApiService {
     periods_per_year?: number;
     local_only?: boolean;
   }) {
-    return this.makeRequest("/analytics/metrics", {
-      method: "POST",
+    return this.makeRequest('/analytics/metrics', {
+      method: 'POST',
       body: JSON.stringify(params),
     });
   }
@@ -146,8 +146,8 @@ class InvestmentApiService {
     method?: string;
     local_only?: boolean;
   }) {
-    return this.makeRequest("/analytics/var", {
-      method: "POST",
+    return this.makeRequest('/analytics/var', {
+      method: 'POST',
       body: JSON.stringify(params),
     });
   }
