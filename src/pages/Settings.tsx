@@ -239,7 +239,7 @@ const Settings = () => {
 
               <div className="p-4 bg-muted rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  API Endpoint: {import.meta.env.VITE_INVESTMENT_API_URL || 'http://localhost:8000'}
+                  API Endpoint: {import.meta.env.VITE_API_URL || 'http://localhost:8000'}
                 </p>
               </div>
             </CardContent>

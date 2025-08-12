@@ -165,7 +165,7 @@ const Index = () => {
               <span className="text-primary ml-1">Real-time Cross-Asset Insights</span>
             </p>
             <div className="flex justify-center space-x-4 mt-2 text-xs text-muted-foreground">
-              <span>API: {import.meta.env.VITE_INVESTMENT_API_URL || 'http://localhost:8000'}</span>
+              <span>API: {import.meta.env.VITE_API_URL || 'http://localhost:8000'}</span>
               <span>•</span>
               <span>Normalized Analytics</span>
               <span>•</span>
