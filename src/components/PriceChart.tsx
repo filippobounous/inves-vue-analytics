@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   LineChart,
@@ -11,77 +10,15 @@ import {
   Legend,
 } from 'recharts';
 import { TrendingUp, Loader2 } from 'lucide-react';
-import { investmentApi } from '@/services/api';
+import { ChartDataPoint } from '@/types/charts';
 
 interface PriceChartProps {
-  portfolioCodes: string[];
-  securityCodes: string[];
+  data: ChartDataPoint[];
+  selectedCodes: string[];
+  loading: boolean;
 }
 
-export function PriceChart({ portfolioCodes, securityCodes }: PriceChartProps) {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const transformPriceData = useCallback(
-    (apiData: any) => {
-      // This is a placeholder transformation - adjust based on actual API response structure
-      if (!apiData || !Array.isArray(apiData)) {
-        return [];
-      }
-
-      return apiData.map((item: any, index: number) => ({
-        date: item.date || `Day ${index + 1}`,
-        ...portfolioCodes.reduce(
-          (acc, code) => ({
-            ...acc,
-            [code]: item[code] || Math.random() * 1000 + 100,
-          }),
-          {},
-        ),
-        ...securityCodes.reduce(
-          (acc, code) => ({
-            ...acc,
-            [code]: item[code] || Math.random() * 200 + 50,
-          }),
-          {},
-        ),
-      }));
-    },
-    [portfolioCodes, securityCodes],
-  );
-
-  const fetchPrices = useCallback(async () => {
-    if (portfolioCodes.length === 0 && securityCodes.length === 0) {
-      setData([]);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    const response = await investmentApi.getPrices({
-      portfolio_codes: portfolioCodes.length > 0 ? portfolioCodes : undefined,
-      security_codes: securityCodes.length > 0 ? securityCodes : undefined,
-      local_only: true,
-      intraday: false,
-    });
-
-    setLoading(false);
-
-    if (response.success && response.data) {
-      // Transform API response to chart data format
-      const chartData = transformPriceData(response.data);
-      setData(chartData);
-    } else {
-      setError(response.error || 'Failed to fetch price data');
-    }
-  }, [portfolioCodes, securityCodes, transformPriceData]);
-
-  useEffect(() => {
-    fetchPrices();
-  }, [fetchPrices]);
-
+export function PriceChart({ data, selectedCodes, loading }: PriceChartProps) {
   const getLineColor = (index: number) => {
     const colors = [
       'hsl(var(--chart-1))',
@@ -94,7 +31,7 @@ export function PriceChart({ portfolioCodes, securityCodes }: PriceChartProps) {
     return colors[index % colors.length];
   };
 
-  if (portfolioCodes.length === 0 && securityCodes.length === 0) {
+  if (selectedCodes.length === 0) {
     return (
       <Card className="chart-container">
         <CardHeader>
@@ -125,10 +62,6 @@ export function PriceChart({ portfolioCodes, securityCodes }: PriceChartProps) {
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        ) : error ? (
-          <div className="flex items-center justify-center h-64">
-            <p className="text-destructive">{error}</p>
-          </div>
         ) : (
           <ResponsiveContainer width="100%" height={400}>
             <LineChart
@@ -153,7 +86,7 @@ export function PriceChart({ portfolioCodes, securityCodes }: PriceChartProps) {
                 }}
               />
               <Legend />
-              {[...portfolioCodes, ...securityCodes].map((code, index) => (
+              {selectedCodes.map((code, index) => (
                 <Line
                   key={code}
                   type="monotone"
