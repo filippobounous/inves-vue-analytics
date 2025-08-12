@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,10 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, X, Search, Building, TrendingUp } from 'lucide-react';
+import { Plus, Search, Building, TrendingUp } from 'lucide-react';
 import { investmentApi } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { useSettings } from '@/contexts/SettingsContext';
+import { SelectedEntitiesList } from './SelectedEntitiesList';
 import {
   TEST_PORTFOLIOS,
   TEST_SECURITIES,
@@ -150,193 +152,114 @@ export function EntitySelector({ onSelectionChange }: EntitySelectorProps) {
     setSecurityCodes(securityCodes.filter((c) => c !== code));
   };
 
-  const getPortfolioDetails = (code: string) => {
-    return availablePortfolios.find((p) => p.code === code);
-  };
-
-  const getSecurityDetails = (code: string) => {
-    return availableSecurities.find((s) => s.code === code);
-  };
-
   return (
-    <Card className="glass border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Search className="h-5 w-5 text-muted-foreground" />
-          Entity Selection
-          {useTestData && (
-            <Badge variant="secondary" className="text-xs">
-              Test Mode
-            </Badge>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="portfolios" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="portfolios" className="flex items-center gap-2">
-              <Building className="h-4 w-4" />
-              Portfolios
-            </TabsTrigger>
-            <TabsTrigger value="securities" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Securities
-            </TabsTrigger>
-          </TabsList>
+    <div className="space-y-4">
+      <Card className="glass border-border/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5 text-muted-foreground" />
+            Entity Selection
+            {useTestData && (
+              <Badge variant="secondary" className="text-xs">
+                Test Mode
+              </Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="portfolios" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="portfolios" className="flex items-center gap-2">
+                <Building className="h-4 w-4" />
+                Portfolios
+              </TabsTrigger>
+              <TabsTrigger value="securities" className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Securities
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="portfolios" className="space-y-4">
-            <div className="flex gap-2">
-              <Select
-                value={selectedPortfolio}
-                onValueChange={setSelectedPortfolio}
-              >
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Select a portfolio..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availablePortfolios
-                    .filter((p) => !portfolioCodes.includes(p.code))
-                    .map((portfolio) => (
-                      <SelectItem key={portfolio.code} value={portfolio.code}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {portfolio.code} - {portfolio.name}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {portfolio.description}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              <Button
-                onClick={addPortfolio}
-                disabled={loading || !selectedPortfolio}
-                className="shrink-0"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
+            <TabsContent value="portfolios" className="space-y-4">
+              <div className="flex gap-2">
+                <Select
+                  value={selectedPortfolio}
+                  onValueChange={setSelectedPortfolio}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Select a portfolio..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availablePortfolios
+                      .filter((p) => !portfolioCodes.includes(p.code))
+                      .map((portfolio) => (
+                        <SelectItem key={portfolio.code} value={portfolio.code}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {portfolio.code} - {portfolio.name}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {portfolio.description}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={addPortfolio}
+                  disabled={loading || !selectedPortfolio}
+                  className="shrink-0"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </TabsContent>
 
-            <div className="space-y-2">
-              {portfolioCodes.map((code) => {
-                const details = getPortfolioDetails(code);
-                return (
-                  <div
-                    key={code}
-                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {code}
-                        </Badge>
-                        <span className="font-medium">
-                          {details?.name || code}
-                        </span>
-                      </div>
-                      {details && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {details.description}
-                        </p>
-                      )}
-                    </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => removePortfolio(code)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                );
-              })}
-              {portfolioCodes.length === 0 && (
-                <p className="text-muted-foreground text-sm text-center py-4">
-                  No portfolios selected
-                </p>
-              )}
-            </div>
-          </TabsContent>
+            <TabsContent value="securities" className="space-y-4">
+              <div className="flex gap-2">
+                <Select
+                  value={selectedSecurity}
+                  onValueChange={setSelectedSecurity}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Select a security..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableSecurities
+                      .filter((s) => !securityCodes.includes(s.code))
+                      .map((security) => (
+                        <SelectItem key={security.code} value={security.code}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {security.code} - {security.name}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {security.sector} • {security.exchange}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={addSecurity}
+                  disabled={loading || !selectedSecurity}
+                  className="shrink-0"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
-          <TabsContent value="securities" className="space-y-4">
-            <div className="flex gap-2">
-              <Select
-                value={selectedSecurity}
-                onValueChange={setSelectedSecurity}
-              >
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Select a security..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableSecurities
-                    .filter((s) => !securityCodes.includes(s.code))
-                    .map((security) => (
-                      <SelectItem key={security.code} value={security.code}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {security.code} - {security.name}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {security.sector} • {security.exchange}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              <Button
-                onClick={addSecurity}
-                disabled={loading || !selectedSecurity}
-                className="shrink-0"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="space-y-2">
-              {securityCodes.map((code) => {
-                const details = getSecurityDetails(code);
-                return (
-                  <div
-                    key={code}
-                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {code}
-                        </Badge>
-                        <span className="font-medium">
-                          {details?.name || code}
-                        </span>
-                      </div>
-                      {details && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {details.sector} • {details.exchange}
-                        </p>
-                      )}
-                    </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => removeSecurity(code)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                );
-              })}
-              {securityCodes.length === 0 && (
-                <p className="text-muted-foreground text-sm text-center py-4">
-                  No securities selected
-                </p>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+      <SelectedEntitiesList
+        selectedPortfolios={portfolioCodes}
+        selectedSecurities={securityCodes}
+        onRemovePortfolio={removePortfolio}
+        onRemoveSecurity={removeSecurity}
+      />
+    </div>
   );
 }

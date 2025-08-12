@@ -1,306 +1,252 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
-import { Network, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PriceChart } from './PriceChart';
+import { ReturnsChart } from './ReturnsChart';
+import { VolatilityChart } from './VolatilityChart';
+import { investmentApi } from '@/services/api';
+import { useSettings } from '@/contexts/SettingsContext';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { investmentApi, type ApiResponse } from '@/services/api';
+  generateMockPriceData,
+  generateMockReturnsData,
+  generateMockVolatilityData,
+} from '@/services/testData';
+import { TrendingUp, BarChart3, Activity, Download } from 'lucide-react';
 
 interface ComparisonAnalysisProps {
   portfolioCodes: string[];
   securityCodes: string[];
 }
 
-type AnalysisType = 'prices' | 'returns' | 'volatility';
-
 interface AnalysisSeries {
-  date?: string;
-  [code: string]: number | string | undefined;
+  [key: string]: any;
 }
-
-type ScatterDataPoint = {
-  entity: string;
-  x: number;
-  y: number;
-} & Partial<Record<AnalysisType, number>>;
 
 export function ComparisonAnalysis({
   portfolioCodes,
   securityCodes,
 }: ComparisonAnalysisProps) {
-  const [data, setData] = useState<ScatterDataPoint[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('prices');
+  const { useTestData, defaultDateRange } = useSettings();
 
-  const [xAxisType, setXAxisType] = useState<AnalysisType>('prices');
-  const [yAxisType, setYAxisType] = useState<AnalysisType>('volatility');
-  const [selectedEntities, setSelectedEntities] = useState<string[]>([]);
+  const allCodes = [...portfolioCodes, ...securityCodes];
 
-  const allEntities = useMemo(
-    () => [...portfolioCodes, ...securityCodes],
-    [portfolioCodes, securityCodes],
-  );
+  const combineAnalysisData = (data: AnalysisSeries[]): AnalysisSeries[] => {
+    if (!Array.isArray(data) || data.length === 0) return [];
+    
+    const dateMap = new Map();
+    
+    data.forEach((series) => {
+      if (Array.isArray(series)) {
+        series.forEach((point: any) => {
+          if (point.date) {
+            if (!dateMap.has(point.date)) {
+              dateMap.set(point.date, { date: point.date });
+            }
+            const existing = dateMap.get(point.date);
+            Object.keys(point).forEach((key) => {
+              if (key !== 'date') {
+                existing[key] = point[key];
+              }
+            });
+          }
+        });
+      }
+    });
 
-  useEffect(() => {
-    if (allEntities.length > 0) {
-      setSelectedEntities(
-        allEntities.slice(0, Math.min(10, allEntities.length)),
-      ); // Limit to 10 entities
-    }
-  }, [allEntities]);
+    return Array.from(dateMap.values()).sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+  };
 
-  const fetchAnalysisData = useCallback(
-    async (
-      analysisType: AnalysisType,
-    ): Promise<ApiResponse<AnalysisSeries[]>> => {
-      const params = {
-        portfolio_codes: selectedEntities.filter((e) =>
-          portfolioCodes.includes(e),
-        ),
-        security_codes: selectedEntities.filter((e) =>
-          securityCodes.includes(e),
-        ),
-        local_only: true,
-      };
-
-      switch (analysisType) {
+  const generateTestData = (type: string) => {
+    const data: AnalysisSeries[] = [];
+    allCodes.forEach((code) => {
+      switch (type) {
         case 'prices':
-          return investmentApi.getPrices(params);
+          data.push(generateMockPriceData(code, defaultDateRange) as any);
+          break;
         case 'returns':
-          return investmentApi.getReturns({
-            ...params,
-            use_ln_ret: false,
-            win_size: 30,
-          });
+          data.push(generateMockReturnsData(code, defaultDateRange) as any);
+          break;
         case 'volatility':
-          return investmentApi.getRealisedVolatility({
-            ...params,
-            rv_model: 'simple',
-            rv_win_size: 30,
-          });
-        default:
-          return { success: false, error: 'Unknown analysis type' };
+          data.push(generateMockVolatilityData(code, defaultDateRange) as any);
+          break;
       }
-    },
-    [selectedEntities, portfolioCodes, securityCodes],
-  );
+    });
+    return { success: true, data: combineAnalysisData(data) };
+  };
 
-  const combineAnalysisData = useCallback(
-    (xData: AnalysisSeries[], yData: AnalysisSeries[]): ScatterDataPoint[] => {
-      const combinedData: ScatterDataPoint[] = [];
-
-      selectedEntities.forEach((entity) => {
-        // Calculate average values for each entity
-        const xValues = xData
-          .map((item) => item[entity])
-          .filter((v): v is number => typeof v === 'number');
-        const yValues = yData
-          .map((item) => item[entity])
-          .filter((v): v is number => typeof v === 'number');
-
-        if (xValues.length > 0 && yValues.length > 0) {
-          const avgX =
-            xValues.reduce((sum, val) => sum + val, 0) / xValues.length;
-          const avgY =
-            yValues.reduce((sum, val) => sum + val, 0) / yValues.length;
-
-          const point: ScatterDataPoint = {
-            entity,
-            x: avgX,
-            y: avgY,
-          };
-          point[xAxisType] = avgX;
-          point[yAxisType] = avgY;
-          combinedData.push(point);
-        }
+  const pricesQuery = useQuery({
+    queryKey: ['comparison-prices', portfolioCodes, securityCodes, useTestData],
+    queryFn: async () => {
+      if (useTestData) {
+        return generateTestData('prices');
+      }
+      const pricesResponse = await investmentApi.getPrices({
+        portfolio_codes: portfolioCodes.length > 0 ? portfolioCodes : undefined,
+        security_codes: securityCodes.length > 0 ? securityCodes : undefined,
       });
-
-      return combinedData;
+      return {
+        ...pricesResponse,
+        data: Array.isArray(pricesResponse.data) ? pricesResponse.data : []
+      };
     },
-    [selectedEntities, xAxisType, yAxisType],
-  );
+    enabled: allCodes.length > 0,
+  });
 
-  const fetchComparisonData = useCallback(async (): Promise<void> => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const [xData, yData] = await Promise.all([
-        fetchAnalysisData(xAxisType),
-        fetchAnalysisData(yAxisType),
-      ]);
-
-      if (xData.success && yData.success && xData.data && yData.data) {
-        // Ensure data is an array before passing to combineAnalysisData
-        const xDataArray = Array.isArray(xData.data) ? xData.data : [];
-        const yDataArray = Array.isArray(yData.data) ? yData.data : [];
-        const combinedData = combineAnalysisData(xDataArray, yDataArray);
-        setData(combinedData);
-      } else {
-        setError('Failed to fetch comparison data');
+  const returnsQuery = useQuery({
+    queryKey: ['comparison-returns', portfolioCodes, securityCodes, useTestData],
+    queryFn: async () => {
+      if (useTestData) {
+        return generateTestData('returns');
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch data');
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchAnalysisData, combineAnalysisData, xAxisType, yAxisType]);
+      const returnsResponse = await investmentApi.getReturns({
+        portfolio_codes: portfolioCodes.length > 0 ? portfolioCodes : undefined,
+        security_codes: securityCodes.length > 0 ? securityCodes : undefined,
+      });
+      return {
+        ...returnsResponse,
+        data: Array.isArray(returnsResponse.data) ? returnsResponse.data : []
+      };
+    },
+    enabled: allCodes.length > 0,
+  });
 
-  useEffect(() => {
-    if (selectedEntities.length === 0) {
-      setData([]);
-      return;
-    }
+  const volatilityQuery = useQuery({
+    queryKey: ['comparison-volatility', portfolioCodes, securityCodes, useTestData],
+    queryFn: async () => {
+      if (useTestData) {
+        return generateTestData('volatility');
+      }
+      const volatilityResponse = await investmentApi.getRealisedVolatility({
+        portfolio_codes: portfolioCodes.length > 0 ? portfolioCodes : undefined,
+        security_codes: securityCodes.length > 0 ? securityCodes : undefined,
+      });
+      return {
+        ...volatilityResponse,
+        data: Array.isArray(volatilityResponse.data) ? volatilityResponse.data : []
+      };
+    },
+    enabled: allCodes.length > 0,
+  });
 
-    fetchComparisonData();
-  }, [selectedEntities, xAxisType, yAxisType, fetchComparisonData]);
-
-  if (allEntities.length === 0) {
+  if (allCodes.length === 0) {
     return (
-      <Card className="chart-container">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Network className="h-5 w-5 text-primary" />
-            Comparison Analysis
-          </CardTitle>
-        </CardHeader>
+      <Card className="glass">
         <CardContent className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">
-            Select portfolios or securities to view comparison analysis
-          </p>
+          <div className="text-center">
+            <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-muted-foreground">
+              No Data Selected
+            </h3>
+            <p className="text-sm text-muted-foreground mt-2">
+              Select portfolios or securities to view comparison analysis
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
   }
 
+  const getCurrentData = () => {
+    switch (activeTab) {
+      case 'prices':
+        return pricesQuery.data?.data || [];
+      case 'returns':
+        return returnsQuery.data?.data || [];
+      case 'volatility':
+        return volatilityQuery.data?.data || [];
+      default:
+        return [];
+    }
+  };
+
+  const getCurrentLoading = () => {
+    switch (activeTab) {
+      case 'prices':
+        return pricesQuery.isLoading;
+      case 'returns':
+        return returnsQuery.isLoading;
+      case 'volatility':
+        return volatilityQuery.isLoading;
+      default:
+        return false;
+    }
+  };
+
   return (
-    <Card className="chart-container">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Network className="h-5 w-5 text-primary" />
-          Comparison Analysis
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex gap-4 items-end">
-          <div className="space-y-2">
-            <Label>X-Axis</Label>
-            <Select
-              value={xAxisType}
-              onValueChange={(value) => setXAxisType(value as AnalysisType)}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="prices">Prices</SelectItem>
-                <SelectItem value="returns">Returns</SelectItem>
-                <SelectItem value="volatility">Volatility</SelectItem>
-              </SelectContent>
-            </Select>
+    <div className="space-y-6">
+      <Card className="glass">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Comparison Analysis
+              {useTestData && (
+                <Badge variant="secondary" className="text-xs">
+                  Test Data
+                </Badge>
+              )}
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-muted-foreground">
+                {allCodes.length} selected
+              </div>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
           </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="prices" className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Prices
+              </TabsTrigger>
+              <TabsTrigger value="returns" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Returns
+              </TabsTrigger>
+              <TabsTrigger value="volatility" className="flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                Volatility
+              </TabsTrigger>
+            </TabsList>
 
-          <div className="space-y-2">
-            <Label>Y-Axis</Label>
-            <Select
-              value={yAxisType}
-              onValueChange={(value) => setYAxisType(value as AnalysisType)}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="prices">Prices</SelectItem>
-                <SelectItem value="returns">Returns</SelectItem>
-                <SelectItem value="volatility">Volatility</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            <TabsContent value="prices" className="mt-6">
+              <PriceChart
+                data={getCurrentData()}
+                selectedCodes={allCodes}
+                loading={getCurrentLoading()}
+              />
+            </TabsContent>
 
-          <Button onClick={fetchComparisonData} disabled={loading}>
-            Update
-          </Button>
-        </div>
+            <TabsContent value="returns" className="mt-6">
+              <ReturnsChart
+                data={getCurrentData()}
+                selectedCodes={allCodes}
+                loading={getCurrentLoading()}
+              />
+            </TabsContent>
 
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : error ? (
-          <div className="flex items-center justify-center h-64">
-            <p className="text-destructive">{error}</p>
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={400}>
-            <ScatterChart
-              data={data}
-              margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="hsl(var(--border))"
+            <TabsContent value="volatility" className="mt-6">
+              <VolatilityChart
+                data={getCurrentData()}
+                selectedCodes={allCodes}
+                loading={getCurrentLoading()}
               />
-              <XAxis
-                type="number"
-                dataKey="x"
-                name={xAxisType}
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-              />
-              <YAxis
-                type="number"
-                dataKey="y"
-                name={yAxisType}
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-              />
-              <Tooltip
-                cursor={{ strokeDasharray: '3 3' }}
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                }}
-                formatter={(value: number, name: string): [string, string] => [
-                  value.toFixed(4),
-                  name,
-                ]}
-                labelFormatter={(
-                  label: string,
-                  payload: Array<{ payload: ScatterDataPoint }>,
-                ): string => {
-                  if (payload && payload.length > 0) {
-                    return `Entity: ${payload[0].payload.entity}`;
-                  }
-                  return label;
-                }}
-              />
-              <Scatter
-                dataKey="y"
-                fill="hsl(var(--chart-1))"
-                fillOpacity={0.7}
-                strokeWidth={2}
-                stroke="hsl(var(--chart-1))"
-              />
-            </ScatterChart>
-          </ResponsiveContainer>
-        )}
-      </CardContent>
-    </Card>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
