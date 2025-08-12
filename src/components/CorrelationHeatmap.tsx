@@ -1,11 +1,16 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Network, Loader2 } from "lucide-react";
 import { investmentApi } from "@/services/api";
 
@@ -14,12 +19,15 @@ interface CorrelationHeatmapProps {
   securityCodes: string[];
 }
 
-export function CorrelationHeatmap({ portfolioCodes, securityCodes }: CorrelationHeatmapProps) {
+export function CorrelationHeatmap({
+  portfolioCodes,
+  securityCodes,
+}: CorrelationHeatmapProps) {
   const [correlationMatrix, setCorrelationMatrix] = useState<number[][]>([]);
   const [labels, setLabels] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Parameters
   const [useReturns, setUseReturns] = useState(true);
   const [logReturns, setLogReturns] = useState(false);
@@ -56,7 +64,9 @@ export function CorrelationHeatmap({ portfolioCodes, securityCodes }: Correlatio
     setLoading(false);
 
     if (response.success && response.data) {
-      const { matrix, labels: responseLabels } = transformCorrelationData(response.data);
+      const { matrix, labels: responseLabels } = transformCorrelationData(
+        response.data,
+      );
       setCorrelationMatrix(matrix);
       setLabels(responseLabels);
     } else {
@@ -64,36 +74,46 @@ export function CorrelationHeatmap({ portfolioCodes, securityCodes }: Correlatio
     }
   };
 
-  const transformCorrelationData = (apiData: any) => {
+  interface CorrelationApiData {
+    matrix?: number[][];
+    labels?: string[];
+  }
+
+  const transformCorrelationData = (apiData: unknown) => {
     const allCodes = [...portfolioCodes, ...securityCodes];
-    
+    const data = apiData as CorrelationApiData | undefined;
+
     // Generate sample correlation matrix if API data is not in expected format
-    if (!apiData || !apiData.matrix) {
+    if (!data || !data.matrix) {
       const size = allCodes.length;
-      const matrix = Array(size).fill(null).map((_, i) =>
-        Array(size).fill(null).map((_, j) => {
-          if (i === j) return 1;
-          return Math.random() * 2 - 1; // Random correlation between -1 and 1
-        })
-      );
+      const matrix = Array(size)
+        .fill(null)
+        .map((_, i) =>
+          Array(size)
+            .fill(null)
+            .map((_, j) => {
+              if (i === j) return 1;
+              return Math.random() * 2 - 1; // Random correlation between -1 and 1
+            }),
+        );
       return { matrix, labels: allCodes };
     }
 
-    return { matrix: apiData.matrix, labels: apiData.labels || allCodes };
+    return { matrix: data.matrix, labels: data.labels || allCodes };
   };
 
   const getCorrelationColor = (value: number) => {
-    if (value > 0.7) return 'bg-green-500';
-    if (value > 0.3) return 'bg-green-400';
-    if (value > 0.1) return 'bg-green-300';
-    if (value > -0.1) return 'bg-gray-300';
-    if (value > -0.3) return 'bg-red-300';
-    if (value > -0.7) return 'bg-red-400';
-    return 'bg-red-500';
+    if (value > 0.7) return "bg-green-500";
+    if (value > 0.3) return "bg-green-400";
+    if (value > 0.1) return "bg-green-300";
+    if (value > -0.1) return "bg-gray-300";
+    if (value > -0.3) return "bg-red-300";
+    if (value > -0.7) return "bg-red-400";
+    return "bg-red-500";
   };
 
   const getTextColor = (value: number) => {
-    return Math.abs(value) > 0.5 ? 'text-white' : 'text-black';
+    return Math.abs(value) > 0.5 ? "text-white" : "text-black";
   };
 
   if (portfolioCodes.length === 0 && securityCodes.length === 0) {
@@ -106,7 +126,9 @@ export function CorrelationHeatmap({ portfolioCodes, securityCodes }: Correlatio
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Select portfolios or securities to view correlation matrix</p>
+          <p className="text-muted-foreground">
+            Select portfolios or securities to view correlation matrix
+          </p>
         </CardContent>
       </Card>
     );
@@ -208,7 +230,10 @@ export function CorrelationHeatmap({ portfolioCodes, securityCodes }: Correlatio
                   <tr>
                     <th className="w-20"></th>
                     {labels.map((label) => (
-                      <th key={label} className="w-20 p-2 text-xs font-medium text-center border border-border">
+                      <th
+                        key={label}
+                        className="w-20 p-2 text-xs font-medium text-center border border-border"
+                      >
                         {label}
                       </th>
                     ))}
@@ -233,7 +258,7 @@ export function CorrelationHeatmap({ portfolioCodes, securityCodes }: Correlatio
                 </tbody>
               </table>
             </div>
-            
+
             {/* Color scale legend */}
             <div className="mt-4 flex items-center justify-center space-x-2">
               <span className="text-xs text-muted-foreground">-1.0</span>

@@ -1,12 +1,26 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import { TrendingUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { investmentApi } from "@/services/api";
 
 interface MultiSeriesChartProps {
@@ -14,7 +28,7 @@ interface MultiSeriesChartProps {
   securityCodes: string[];
 }
 
-type SeriesType = 'prices' | 'returns' | 'volatility' | 'correlations';
+type SeriesType = "prices" | "returns" | "volatility" | "correlations";
 
 interface SeriesConfig {
   type: SeriesType;
@@ -23,19 +37,51 @@ interface SeriesConfig {
   color: string;
 }
 
-export function MultiSeriesChart({ portfolioCodes, securityCodes }: MultiSeriesChartProps) {
-  const [data, setData] = useState<any[]>([]);
+export function MultiSeriesChart({
+  portfolioCodes,
+  securityCodes,
+}: MultiSeriesChartProps) {
+  interface SeriesDataItem {
+    date?: string;
+    [key: string]: string | number | undefined;
+  }
+
+  type CombinedDataItem = { date: string } & Record<string, number | string>;
+
+  const [data, setData] = useState<CombinedDataItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const [seriesConfigs, setSeriesConfigs] = useState<Record<SeriesType, SeriesConfig>>({
-    prices: { type: 'prices', enabled: true, normalized: false, color: 'hsl(var(--chart-1))' },
-    returns: { type: 'returns', enabled: false, normalized: false, color: 'hsl(var(--chart-2))' },
-    volatility: { type: 'volatility', enabled: false, normalized: false, color: 'hsl(var(--chart-3))' },
-    correlations: { type: 'correlations', enabled: false, normalized: false, color: 'hsl(var(--chart-4))' }
+
+  const [seriesConfigs, setSeriesConfigs] = useState<
+    Record<SeriesType, SeriesConfig>
+  >({
+    prices: {
+      type: "prices",
+      enabled: true,
+      normalized: false,
+      color: "hsl(var(--chart-1))",
+    },
+    returns: {
+      type: "returns",
+      enabled: false,
+      normalized: false,
+      color: "hsl(var(--chart-2))",
+    },
+    volatility: {
+      type: "volatility",
+      enabled: false,
+      normalized: false,
+      color: "hsl(var(--chart-3))",
+    },
+    correlations: {
+      type: "correlations",
+      enabled: false,
+      normalized: false,
+      color: "hsl(var(--chart-4))",
+    },
   });
 
-  const [selectedEntity, setSelectedEntity] = useState<string>('');
+  const [selectedEntity, setSelectedEntity] = useState<string>("");
 
   useEffect(() => {
     const allEntities = [...portfolioCodes, ...securityCodes];
@@ -45,7 +91,10 @@ export function MultiSeriesChart({ portfolioCodes, securityCodes }: MultiSeriesC
   }, [portfolioCodes, securityCodes, selectedEntity]);
 
   useEffect(() => {
-    if ((portfolioCodes.length === 0 && securityCodes.length === 0) || !selectedEntity) {
+    if (
+      (portfolioCodes.length === 0 && securityCodes.length === 0) ||
+      !selectedEntity
+    ) {
       setData([]);
       return;
     }
@@ -58,15 +107,19 @@ export function MultiSeriesChart({ portfolioCodes, securityCodes }: MultiSeriesC
     setError(null);
 
     try {
-      const enabledSeries = Object.values(seriesConfigs).filter(config => config.enabled);
-      const dataPromises = enabledSeries.map(config => fetchSeriesData(config.type));
-      
+      const enabledSeries = Object.values(seriesConfigs).filter(
+        (config) => config.enabled,
+      );
+      const dataPromises = enabledSeries.map((config) =>
+        fetchSeriesData(config.type),
+      );
+
       const results = await Promise.all(dataPromises);
       const combinedData = combineSeriesData(results, enabledSeries);
-      
+
       setData(combinedData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch data');
+      setError(err instanceof Error ? err.message : "Failed to fetch data");
     } finally {
       setLoading(false);
     }
@@ -74,83 +127,98 @@ export function MultiSeriesChart({ portfolioCodes, securityCodes }: MultiSeriesC
 
   const fetchSeriesData = async (seriesType: SeriesType) => {
     const params = {
-      portfolio_codes: portfolioCodes.includes(selectedEntity) ? [selectedEntity] : undefined,
-      security_codes: securityCodes.includes(selectedEntity) ? [selectedEntity] : undefined,
+      portfolio_codes: portfolioCodes.includes(selectedEntity)
+        ? [selectedEntity]
+        : undefined,
+      security_codes: securityCodes.includes(selectedEntity)
+        ? [selectedEntity]
+        : undefined,
       local_only: true,
     };
 
     switch (seriesType) {
-      case 'prices':
+      case "prices":
         return investmentApi.getPrices(params);
-      case 'returns':
-        return investmentApi.getReturns({ ...params, use_ln_ret: false, win_size: 30 });
-      case 'volatility':
-        return investmentApi.getRealisedVolatility({ ...params, rv_model: 'simple', rv_win_size: 30 });
-      case 'correlations':
+      case "returns":
+        return investmentApi.getReturns({
+          ...params,
+          use_ln_ret: false,
+          win_size: 30,
+        });
+      case "volatility":
+        return investmentApi.getRealisedVolatility({
+          ...params,
+          rv_model: "simple",
+          rv_win_size: 30,
+        });
+      case "correlations":
         // For correlation, we need at least 2 entities, so return mock data or handle differently
         return { success: true, data: [] };
       default:
-        return { success: false, error: 'Unknown series type' };
+        return { success: false, error: "Unknown series type" };
     }
   };
 
-  const combineSeriesData = (results: any[], configs: SeriesConfig[]) => {
-    const combinedData: any[] = [];
-    
+  const combineSeriesData = (
+    results: Array<{ success: boolean; data?: SeriesDataItem[] }>,
+    configs: SeriesConfig[],
+  ): CombinedDataItem[] => {
+    const combinedData: CombinedDataItem[] = [];
+
     results.forEach((result, index) => {
       if (result.success && result.data && Array.isArray(result.data)) {
         const config = configs[index];
-        const seriesData = result.data.map((item: any, dataIndex: number) => {
-          let value = item[selectedEntity] || Math.random() * 100;
-          
+        const seriesData = result.data.map((item, dataIndex) => {
+          let value = (item[selectedEntity] as number) || Math.random() * 100;
+
           // Apply normalization if enabled
           if (config.normalized && result.data.length > 0) {
-            const firstValue = result.data[0][selectedEntity] || 1;
+            const firstValue = (result.data[0][selectedEntity] as number) || 1;
             value = (value / firstValue) * 100; // Normalize to base 100
           }
-          
+
           return {
             date: item.date || `Day ${dataIndex + 1}`,
-            [`${config.type}_${selectedEntity}`]: value
+            [`${config.type}_${selectedEntity}`]: value,
           };
         });
-        
+
         // Merge with existing data
         seriesData.forEach((item, dataIndex) => {
           if (!combinedData[dataIndex]) {
-            combinedData[dataIndex] = { date: item.date };
+            combinedData[dataIndex] = { date: item.date } as CombinedDataItem;
           }
           Object.assign(combinedData[dataIndex], item);
         });
       }
     });
-    
+
     return combinedData;
   };
 
   const normalizeData = (data: number[]): number[] => {
     if (data.length === 0) return [];
     const firstValue = data[0];
-    return data.map(value => (value / firstValue) * 100);
+    return data.map((value) => (value / firstValue) * 100);
   };
 
   const toggleSeries = (seriesType: SeriesType) => {
-    setSeriesConfigs(prev => ({
+    setSeriesConfigs((prev) => ({
       ...prev,
       [seriesType]: {
         ...prev[seriesType],
-        enabled: !prev[seriesType].enabled
-      }
+        enabled: !prev[seriesType].enabled,
+      },
     }));
   };
 
   const toggleNormalization = (seriesType: SeriesType) => {
-    setSeriesConfigs(prev => ({
+    setSeriesConfigs((prev) => ({
       ...prev,
       [seriesType]: {
         ...prev[seriesType],
-        normalized: !prev[seriesType].normalized
-      }
+        normalized: !prev[seriesType].normalized,
+      },
     }));
   };
 
@@ -166,7 +234,9 @@ export function MultiSeriesChart({ portfolioCodes, securityCodes }: MultiSeriesC
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Select portfolios or securities to view multi-series analysis</p>
+          <p className="text-muted-foreground">
+            Select portfolios or securities to view multi-series analysis
+          </p>
         </CardContent>
       </Card>
     );
@@ -189,8 +259,10 @@ export function MultiSeriesChart({ portfolioCodes, securityCodes }: MultiSeriesC
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {allEntities.map(entity => (
-                  <SelectItem key={entity} value={entity}>{entity}</SelectItem>
+                {allEntities.map((entity) => (
+                  <SelectItem key={entity} value={entity}>
+                    {entity}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -205,16 +277,22 @@ export function MultiSeriesChart({ portfolioCodes, securityCodes }: MultiSeriesC
                     checked={config.enabled}
                     onCheckedChange={() => toggleSeries(key as SeriesType)}
                   />
-                  <Label htmlFor={`${key}-enabled`} className="capitalize">{key}</Label>
+                  <Label htmlFor={`${key}-enabled`} className="capitalize">
+                    {key}
+                  </Label>
                 </div>
                 {config.enabled && (
                   <div className="flex items-center space-x-2 ml-6">
                     <Checkbox
                       id={`${key}-normalized`}
                       checked={config.normalized}
-                      onCheckedChange={() => toggleNormalization(key as SeriesType)}
+                      onCheckedChange={() =>
+                        toggleNormalization(key as SeriesType)
+                      }
                     />
-                    <Label htmlFor={`${key}-normalized`} className="text-xs">Normalize</Label>
+                    <Label htmlFor={`${key}-normalized`} className="text-xs">
+                      Normalize
+                    </Label>
                   </div>
                 )}
               </div>
@@ -236,22 +314,25 @@ export function MultiSeriesChart({ portfolioCodes, securityCodes }: MultiSeriesC
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={500}>
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis 
-                dataKey="date" 
+            <LineChart
+              data={data}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--border))"
+              />
+              <XAxis
+                dataKey="date"
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
               />
-              <YAxis 
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-              />
-              <Tooltip 
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <Tooltip
                 contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "8px",
                 }}
               />
               <Legend />
@@ -266,7 +347,7 @@ export function MultiSeriesChart({ portfolioCodes, securityCodes }: MultiSeriesC
                     strokeWidth={2}
                     dot={false}
                     activeDot={{ r: 4, fill: config.color }}
-                    name={`${key}${config.normalized ? ' (normalized)' : ''}`}
+                    name={`${key}${config.normalized ? " (normalized)" : ""}`}
                   />
                 ))}
             </LineChart>

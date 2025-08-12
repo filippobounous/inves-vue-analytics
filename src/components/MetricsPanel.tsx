@@ -73,7 +73,7 @@ export function MetricsPanel({
     }
   };
 
-  const transformMetricsData = (apiData: any): Metric[] => {
+  const transformMetricsData = (apiData: unknown): Metric[] => {
     const allCodes = [...portfolioCodes, ...securityCodes];
 
     // Generate sample metrics if API data is not in expected format
@@ -89,7 +89,7 @@ export function MetricsPanel({
       }));
     }
 
-    return apiData;
+    return apiData as Metric[];
   };
 
   const formatPercentage = (value: number | undefined) => {

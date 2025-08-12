@@ -67,7 +67,7 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
     }
   };
 
-  const transformVarData = (apiData: any): VarData[] => {
+  const transformVarData = (apiData: unknown): VarData[] => {
     const allCodes = [...portfolioCodes, ...securityCodes];
 
     // Generate sample VaR data if API data is not in expected format
@@ -80,7 +80,7 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
       }));
     }
 
-    return apiData;
+    return apiData as VarData[];
   };
 
   const formatPercentage = (value: number) => {

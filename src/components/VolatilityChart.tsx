@@ -1,12 +1,26 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import { Activity, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { investmentApi } from "@/services/api";
 
 interface VolatilityChartProps {
@@ -14,8 +28,17 @@ interface VolatilityChartProps {
   securityCodes: string[];
 }
 
-export function VolatilityChart({ portfolioCodes, securityCodes }: VolatilityChartProps) {
-  const [data, setData] = useState<any[]>([]);
+export function VolatilityChart({
+  portfolioCodes,
+  securityCodes,
+}: VolatilityChartProps) {
+  type VolatilityDataItem = { date: string } & Record<string, number | string>;
+  type VolatilityApiItem = { date?: string } & Record<
+    string,
+    number | string | undefined
+  >;
+
+  const [data, setData] = useState<VolatilityDataItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rvModel, setRvModel] = useState("simple");
@@ -52,26 +75,39 @@ export function VolatilityChart({ portfolioCodes, securityCodes }: VolatilityCha
     }
   };
 
-  const transformVolatilityData = (apiData: any) => {
+  const transformVolatilityData = (apiData: unknown): VolatilityDataItem[] => {
     if (!apiData || !Array.isArray(apiData)) {
       return [];
     }
 
-    return apiData.map((item: any, index: number) => ({
+    return (apiData as VolatilityApiItem[]).map((item, index) => ({
       date: item.date || `Day ${index + 1}`,
-      ...portfolioCodes.reduce((acc, code) => ({
-        ...acc,
-        [code]: item[code] || Math.random() * 0.3 + 0.1
-      }), {}),
-      ...securityCodes.reduce((acc, code) => ({
-        ...acc,
-        [code]: item[code] || Math.random() * 0.4 + 0.15
-      }), {}),
+      ...portfolioCodes.reduce(
+        (acc, code) => ({
+          ...acc,
+          [code]: (item[code] as number) || Math.random() * 0.3 + 0.1,
+        }),
+        {},
+      ),
+      ...securityCodes.reduce(
+        (acc, code) => ({
+          ...acc,
+          [code]: (item[code] as number) || Math.random() * 0.4 + 0.15,
+        }),
+        {},
+      ),
     }));
   };
 
   const getLineColor = (index: number) => {
-    const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', 'hsl(var(--chart-6))'];
+    const colors = [
+      "hsl(var(--chart-1))",
+      "hsl(var(--chart-2))",
+      "hsl(var(--chart-3))",
+      "hsl(var(--chart-4))",
+      "hsl(var(--chart-5))",
+      "hsl(var(--chart-6))",
+    ];
     return colors[index % colors.length];
   };
 
@@ -85,7 +121,9 @@ export function VolatilityChart({ portfolioCodes, securityCodes }: VolatilityCha
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Select portfolios or securities to view volatility analysis</p>
+          <p className="text-muted-foreground">
+            Select portfolios or securities to view volatility analysis
+          </p>
         </CardContent>
       </Card>
     );
@@ -140,25 +178,34 @@ export function VolatilityChart({ portfolioCodes, securityCodes }: VolatilityCha
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis 
-                dataKey="date" 
+            <LineChart
+              data={data}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--border))"
+              />
+              <XAxis
+                dataKey="date"
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
               />
-              <YAxis 
+              <YAxis
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
                 tickFormatter={(value) => `${(value * 100).toFixed(1)}%`}
               />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "8px",
                 }}
-                formatter={(value: any) => [`${(value * 100).toFixed(2)}%`, '']}
+                formatter={(value: number) => [
+                  `${(value * 100).toFixed(2)}%`,
+                  "",
+                ]}
               />
               <Legend />
               {[...portfolioCodes, ...securityCodes].map((code, index) => (

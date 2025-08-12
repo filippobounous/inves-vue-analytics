@@ -1,7 +1,15 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import { BarChart3, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,8 +22,17 @@ interface ReturnsChartProps {
   securityCodes: string[];
 }
 
-export function ReturnsChart({ portfolioCodes, securityCodes }: ReturnsChartProps) {
-  const [data, setData] = useState<any[]>([]);
+export function ReturnsChart({
+  portfolioCodes,
+  securityCodes,
+}: ReturnsChartProps) {
+  type ReturnsDataItem = { date: string } & Record<string, number | string>;
+  type ReturnsApiItem = { date?: string } & Record<
+    string,
+    number | string | undefined
+  >;
+
+  const [data, setData] = useState<ReturnsDataItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [useLnRet, setUseLnRet] = useState(false);
@@ -52,26 +69,39 @@ export function ReturnsChart({ portfolioCodes, securityCodes }: ReturnsChartProp
     }
   };
 
-  const transformReturnsData = (apiData: any) => {
+  const transformReturnsData = (apiData: unknown): ReturnsDataItem[] => {
     if (!apiData || !Array.isArray(apiData)) {
       return [];
     }
 
-    return apiData.map((item: any, index: number) => ({
+    return (apiData as ReturnsApiItem[]).map((item, index) => ({
       date: item.date || `Day ${index + 1}`,
-      ...portfolioCodes.reduce((acc, code) => ({
-        ...acc,
-        [code]: item[code] || (Math.random() - 0.5) * 0.05
-      }), {}),
-      ...securityCodes.reduce((acc, code) => ({
-        ...acc,
-        [code]: item[code] || (Math.random() - 0.5) * 0.08
-      }), {}),
+      ...portfolioCodes.reduce(
+        (acc, code) => ({
+          ...acc,
+          [code]: (item[code] as number) || (Math.random() - 0.5) * 0.05,
+        }),
+        {},
+      ),
+      ...securityCodes.reduce(
+        (acc, code) => ({
+          ...acc,
+          [code]: (item[code] as number) || (Math.random() - 0.5) * 0.08,
+        }),
+        {},
+      ),
     }));
   };
 
   const getLineColor = (index: number) => {
-    const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', 'hsl(var(--chart-6))'];
+    const colors = [
+      "hsl(var(--chart-1))",
+      "hsl(var(--chart-2))",
+      "hsl(var(--chart-3))",
+      "hsl(var(--chart-4))",
+      "hsl(var(--chart-5))",
+      "hsl(var(--chart-6))",
+    ];
     return colors[index % colors.length];
   };
 
@@ -85,7 +115,9 @@ export function ReturnsChart({ portfolioCodes, securityCodes }: ReturnsChartProp
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Select portfolios or securities to view returns analysis</p>
+          <p className="text-muted-foreground">
+            Select portfolios or securities to view returns analysis
+          </p>
         </CardContent>
       </Card>
     );
@@ -135,25 +167,34 @@ export function ReturnsChart({ portfolioCodes, securityCodes }: ReturnsChartProp
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis 
-                dataKey="date" 
+            <LineChart
+              data={data}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--border))"
+              />
+              <XAxis
+                dataKey="date"
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
               />
-              <YAxis 
+              <YAxis
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
                 tickFormatter={(value) => `${(value * 100).toFixed(2)}%`}
               />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "8px",
                 }}
-                formatter={(value: any) => [`${(value * 100).toFixed(3)}%`, '']}
+                formatter={(value: number) => [
+                  `${(value * 100).toFixed(3)}%`,
+                  "",
+                ]}
               />
               <Legend />
               {[...portfolioCodes, ...securityCodes].map((code, index) => (
