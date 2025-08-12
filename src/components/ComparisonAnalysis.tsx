@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ScatterChart,
@@ -51,7 +51,10 @@ export function ComparisonAnalysis({
   const [yAxisType, setYAxisType] = useState<AnalysisType>("volatility");
   const [selectedEntities, setSelectedEntities] = useState<string[]>([]);
 
-  const allEntities = [...portfolioCodes, ...securityCodes];
+  const allEntities = useMemo(
+    () => [...portfolioCodes, ...securityCodes],
+    [portfolioCodes, securityCodes],
+  );
 
   useEffect(() => {
     if (allEntities.length > 0) {
@@ -59,18 +62,80 @@ export function ComparisonAnalysis({
         allEntities.slice(0, Math.min(10, allEntities.length)),
       ); // Limit to 10 entities
     }
-  }, [portfolioCodes, securityCodes]);
+  }, [allEntities]);
 
-  useEffect(() => {
-    if (selectedEntities.length === 0) {
-      setData([]);
-      return;
-    }
+  const fetchAnalysisData = useCallback(
+    async (
+      analysisType: AnalysisType,
+    ): Promise<ApiResponse<AnalysisSeries[]>> => {
+      const params = {
+        portfolio_codes: selectedEntities.filter((e) =>
+          portfolioCodes.includes(e),
+        ),
+        security_codes: selectedEntities.filter((e) =>
+          securityCodes.includes(e),
+        ),
+        local_only: true,
+      };
 
-    fetchComparisonData();
-  }, [selectedEntities, xAxisType, yAxisType]);
+      switch (analysisType) {
+        case "prices":
+          return investmentApi.getPrices(params);
+        case "returns":
+          return investmentApi.getReturns({
+            ...params,
+            use_ln_ret: false,
+            win_size: 30,
+          });
+        case "volatility":
+          return investmentApi.getRealisedVolatility({
+            ...params,
+            rv_model: "simple",
+            rv_win_size: 30,
+          });
+        default:
+          return { success: false, error: "Unknown analysis type" };
+      }
+    },
+    [selectedEntities, portfolioCodes, securityCodes],
+  );
 
-  const fetchComparisonData = async (): Promise<void> => {
+  const combineAnalysisData = useCallback(
+    (xData: AnalysisSeries[], yData: AnalysisSeries[]): ScatterDataPoint[] => {
+      const combinedData: ScatterDataPoint[] = [];
+
+      selectedEntities.forEach((entity) => {
+        // Calculate average values for each entity
+        const xValues = xData
+          .map((item) => item[entity])
+          .filter((v): v is number => typeof v === "number");
+        const yValues = yData
+          .map((item) => item[entity])
+          .filter((v): v is number => typeof v === "number");
+
+        if (xValues.length > 0 && yValues.length > 0) {
+          const avgX =
+            xValues.reduce((sum, val) => sum + val, 0) / xValues.length;
+          const avgY =
+            yValues.reduce((sum, val) => sum + val, 0) / yValues.length;
+
+          const point: ScatterDataPoint = {
+            entity,
+            x: avgX,
+            y: avgY,
+          };
+          point[xAxisType] = avgX;
+          point[yAxisType] = avgY;
+          combinedData.push(point);
+        }
+      });
+
+      return combinedData;
+    },
+    [selectedEntities, xAxisType, yAxisType],
+  );
+
+  const fetchComparisonData = useCallback(async (): Promise<void> => {
     setLoading(true);
     setError(null);
 
@@ -94,73 +159,16 @@ export function ComparisonAnalysis({
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchAnalysisData, combineAnalysisData, xAxisType, yAxisType]);
 
-  const fetchAnalysisData = async (
-    analysisType: AnalysisType,
-  ): Promise<ApiResponse<AnalysisSeries[]>> => {
-    const params = {
-      portfolio_codes: selectedEntities.filter((e) =>
-        portfolioCodes.includes(e),
-      ),
-      security_codes: selectedEntities.filter((e) => securityCodes.includes(e)),
-      local_only: true,
-    };
-
-    switch (analysisType) {
-      case "prices":
-        return investmentApi.getPrices(params);
-      case "returns":
-        return investmentApi.getReturns({
-          ...params,
-          use_ln_ret: false,
-          win_size: 30,
-        });
-      case "volatility":
-        return investmentApi.getRealisedVolatility({
-          ...params,
-          rv_model: "simple",
-          rv_win_size: 30,
-        });
-      default:
-        return { success: false, error: "Unknown analysis type" };
+  useEffect(() => {
+    if (selectedEntities.length === 0) {
+      setData([]);
+      return;
     }
-  };
 
-  const combineAnalysisData = (
-    xData: AnalysisSeries[],
-    yData: AnalysisSeries[],
-  ): ScatterDataPoint[] => {
-    const combinedData: ScatterDataPoint[] = [];
-
-    selectedEntities.forEach((entity) => {
-      // Calculate average values for each entity
-      const xValues = xData
-        .map((item) => item[entity])
-        .filter((v): v is number => typeof v === "number");
-      const yValues = yData
-        .map((item) => item[entity])
-        .filter((v): v is number => typeof v === "number");
-
-      if (xValues.length > 0 && yValues.length > 0) {
-        const avgX =
-          xValues.reduce((sum, val) => sum + val, 0) / xValues.length;
-        const avgY =
-          yValues.reduce((sum, val) => sum + val, 0) / yValues.length;
-
-        const point: ScatterDataPoint = {
-          entity,
-          x: avgX,
-          y: avgY,
-        };
-        point[xAxisType] = avgX;
-        point[yAxisType] = avgY;
-        combinedData.push(point);
-      }
-    });
-
-    return combinedData;
-  };
+    fetchComparisonData();
+  }, [selectedEntities, xAxisType, yAxisType, fetchComparisonData]);
 
   if (allEntities.length === 0) {
     return (
