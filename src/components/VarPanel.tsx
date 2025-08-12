@@ -1,10 +1,15 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AlertTriangle, Loader2, Shield } from "lucide-react";
 import { investmentApi } from "@/services/api";
 
@@ -24,7 +29,7 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
   const [varData, setVarData] = useState<VarData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Parameters
   const [varWinSize, setVarWinSize] = useState(252);
   const [confidenceLevel, setConfidenceLevel] = useState(0.95);
@@ -64,10 +69,10 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
 
   const transformVarData = (apiData: any): VarData[] => {
     const allCodes = [...portfolioCodes, ...securityCodes];
-    
+
     // Generate sample VaR data if API data is not in expected format
     if (!Array.isArray(apiData)) {
-      return allCodes.map(code => ({
+      return allCodes.map((code) => ({
         code,
         var_value: -(Math.random() * 0.15 + 0.02), // Negative VaR values
         confidence_level: confidenceLevel,
@@ -84,9 +89,21 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
 
   const getVarSeverity = (value: number) => {
     const absValue = Math.abs(value);
-    if (absValue > 0.1) return { color: 'text-error', icon: AlertTriangle, severity: 'High Risk' };
-    if (absValue > 0.05) return { color: 'text-warning', icon: AlertTriangle, severity: 'Medium Risk' };
-    return { color: 'text-success', icon: Shield, severity: 'Low Risk' };
+    if (absValue > 0.1) {
+      return {
+        color: "text-destructive",
+        icon: AlertTriangle,
+        severity: "High Risk",
+      };
+    }
+    if (absValue > 0.05) {
+      return {
+        color: "text-warning",
+        icon: AlertTriangle,
+        severity: "Medium Risk",
+      };
+    }
+    return { color: "text-success", icon: Shield, severity: "Low Risk" };
   };
 
   if (portfolioCodes.length === 0 && securityCodes.length === 0) {
@@ -99,7 +116,9 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Select portfolios or securities to view VaR analysis</p>
+          <p className="text-muted-foreground">
+            Select portfolios or securities to view VaR analysis
+          </p>
         </CardContent>
       </Card>
     );
@@ -128,8 +147,8 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="confidenceLevel">Confidence Level</Label>
-            <Select 
-              value={confidenceLevel.toString()} 
+            <Select
+              value={confidenceLevel.toString()}
               onValueChange={(value) => setConfidenceLevel(Number(value))}
             >
               <SelectTrigger>
@@ -171,33 +190,44 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
             {varData.map((data) => {
               const severity = getVarSeverity(data.var_value);
               const Icon = severity.icon;
-              
+
               return (
                 <Card key={data.code} className="metric-card">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-semibold text-lg">{data.code}</h3>
-                      <div className={`flex items-center gap-1 ${severity.color}`}>
+                      <div
+                        className={`flex items-center gap-1 ${severity.color}`}
+                      >
                         <Icon className="h-4 w-4" />
                         <span className="text-xs">{severity.severity}</span>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">VaR ({Math.round(data.confidence_level * 100)}%)</span>
-                        <span className={`font-mono font-bold text-lg ${severity.color} financial-number`}>
+                        <span className="text-sm text-muted-foreground">
+                          VaR ({Math.round(data.confidence_level * 100)}%)
+                        </span>
+                        <span
+                          className={`font-mono font-bold text-lg ${severity.color} financial-number`}
+                        >
                           {formatPercentage(data.var_value)}
                         </span>
                       </div>
-                      
+
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-muted-foreground">Method</span>
-                        <span className="text-xs capitalize">{data.method}</span>
+                        <span className="text-xs text-muted-foreground">
+                          Method
+                        </span>
+                        <span className="text-xs capitalize">
+                          {data.method}
+                        </span>
                       </div>
-                      
+
                       <div className="text-xs text-muted-foreground mt-3">
-                        Expected maximum loss with {Math.round(data.confidence_level * 100)}% confidence
+                        Expected maximum loss with{" "}
+                        {Math.round(data.confidence_level * 100)}% confidence
                       </div>
                     </div>
                   </CardContent>
