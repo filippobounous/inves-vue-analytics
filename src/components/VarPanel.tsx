@@ -89,18 +89,20 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
 
   const getVarSeverity = (value: number) => {
     const absValue = Math.abs(value);
-    if (absValue > 0.1)
+    if (absValue > 0.1) {
       return {
-        color: "text-error",
+        color: "text-destructive",
         icon: AlertTriangle,
         severity: "High Risk",
       };
-    if (absValue > 0.05)
+    }
+    if (absValue > 0.05) {
       return {
         color: "text-warning",
         icon: AlertTriangle,
         severity: "Medium Risk",
       };
+    }
     return { color: "text-success", icon: Shield, severity: "Low Risk" };
   };
 

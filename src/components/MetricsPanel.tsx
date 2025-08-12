@@ -109,9 +109,9 @@ export function MetricsPanel({
     if (value === undefined || value === null) return "text-muted-foreground";
 
     if (type === "positive") {
-      return value > 0 ? "text-success" : "text-error";
+      return value > 0 ? "text-success" : "text-destructive";
     } else {
-      return value < 0 ? "text-error" : "text-success";
+      return value < 0 ? "text-destructive" : "text-success";
     }
   };
 
@@ -238,12 +238,12 @@ export function MetricsPanel({
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <TrendingDown className="h-4 w-4 text-error" />
+                      <TrendingDown className="h-4 w-4 text-destructive" />
                       <div>
                         <p className="text-xs text-muted-foreground">
                           Max Drawdown
                         </p>
-                        <p className="font-mono text-sm font-medium text-error financial-number">
+                        <p className="font-mono text-sm font-medium text-destructive financial-number">
                           {formatPercentage(metric.max_drawdown)}
                         </p>
                       </div>
