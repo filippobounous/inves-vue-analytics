@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   LineChart,
@@ -83,7 +83,81 @@ export function MultiSeriesChart({
     }
   }, [portfolioCodes, securityCodes, selectedEntity]);
 
-  useEffect(() => {
+  const fetchSeriesData = useCallback(
+    async (seriesType: SeriesType) => {
+      const params = {
+        portfolio_codes: portfolioCodes.includes(selectedEntity)
+          ? [selectedEntity]
+          : undefined,
+        security_codes: securityCodes.includes(selectedEntity)
+          ? [selectedEntity]
+          : undefined,
+        local_only: true,
+      };
+
+      switch (seriesType) {
+        case 'prices':
+          return investmentApi.getPrices(params);
+        case 'returns':
+          return investmentApi.getReturns({
+            ...params,
+            use_ln_ret: false,
+            win_size: 30,
+          });
+        case 'volatility':
+          return investmentApi.getRealisedVolatility({
+            ...params,
+            rv_model: 'simple',
+            rv_win_size: 30,
+          });
+        case 'correlations':
+          // For correlation, we need at least 2 entities, so return mock data or handle differently
+          return { success: true, data: [] };
+        default:
+          return { success: false, error: 'Unknown series type' };
+      }
+    },
+    [portfolioCodes, securityCodes, selectedEntity],
+  );
+
+  const combineSeriesData = useCallback(
+    (results: any[], configs: SeriesConfig[]) => {
+      const combinedData: any[] = [];
+
+      results.forEach((result, index) => {
+        if (result.success && result.data && Array.isArray(result.data)) {
+          const config = configs[index];
+          const seriesData = result.data.map((item: any, dataIndex: number) => {
+            let value = item[selectedEntity] || Math.random() * 100;
+
+            // Apply normalization if enabled
+            if (config.normalized && result.data.length > 0) {
+              const firstValue = result.data[0][selectedEntity] || 1;
+              value = (value / firstValue) * 100; // Normalize to base 100
+            }
+
+            return {
+              date: item.date || `Day ${dataIndex + 1}`,
+              [`${config.type}_${selectedEntity}`]: value,
+            };
+          });
+
+          // Merge with existing data
+          seriesData.forEach((item, dataIndex) => {
+            if (!combinedData[dataIndex]) {
+              combinedData[dataIndex] = { date: item.date };
+            }
+            Object.assign(combinedData[dataIndex], item);
+          });
+        }
+      });
+
+      return combinedData;
+    },
+    [selectedEntity],
+  );
+
+  const fetchMultiSeriesData = useCallback(async () => {
     if (
       (portfolioCodes.length === 0 && securityCodes.length === 0) ||
       !selectedEntity
@@ -92,10 +166,6 @@ export function MultiSeriesChart({
       return;
     }
 
-    fetchMultiSeriesData();
-  }, [portfolioCodes, securityCodes, selectedEntity, seriesConfigs]);
-
-  const fetchMultiSeriesData = async () => {
     setLoading(true);
     setError(null);
 
@@ -116,75 +186,18 @@ export function MultiSeriesChart({
     } finally {
       setLoading(false);
     }
-  };
+  }, [
+    portfolioCodes,
+    securityCodes,
+    selectedEntity,
+    seriesConfigs,
+    fetchSeriesData,
+    combineSeriesData,
+  ]);
 
-  const fetchSeriesData = async (seriesType: SeriesType) => {
-    const params = {
-      portfolio_codes: portfolioCodes.includes(selectedEntity)
-        ? [selectedEntity]
-        : undefined,
-      security_codes: securityCodes.includes(selectedEntity)
-        ? [selectedEntity]
-        : undefined,
-      local_only: true,
-    };
-
-    switch (seriesType) {
-      case 'prices':
-        return investmentApi.getPrices(params);
-      case 'returns':
-        return investmentApi.getReturns({
-          ...params,
-          use_ln_ret: false,
-          win_size: 30,
-        });
-      case 'volatility':
-        return investmentApi.getRealisedVolatility({
-          ...params,
-          rv_model: 'simple',
-          rv_win_size: 30,
-        });
-      case 'correlations':
-        // For correlation, we need at least 2 entities, so return mock data or handle differently
-        return { success: true, data: [] };
-      default:
-        return { success: false, error: 'Unknown series type' };
-    }
-  };
-
-  const combineSeriesData = (results: any[], configs: SeriesConfig[]) => {
-    const combinedData: any[] = [];
-
-    results.forEach((result, index) => {
-      if (result.success && result.data && Array.isArray(result.data)) {
-        const config = configs[index];
-        const seriesData = result.data.map((item: any, dataIndex: number) => {
-          let value = item[selectedEntity] || Math.random() * 100;
-
-          // Apply normalization if enabled
-          if (config.normalized && result.data.length > 0) {
-            const firstValue = result.data[0][selectedEntity] || 1;
-            value = (value / firstValue) * 100; // Normalize to base 100
-          }
-
-          return {
-            date: item.date || `Day ${dataIndex + 1}`,
-            [`${config.type}_${selectedEntity}`]: value,
-          };
-        });
-
-        // Merge with existing data
-        seriesData.forEach((item, dataIndex) => {
-          if (!combinedData[dataIndex]) {
-            combinedData[dataIndex] = { date: item.date };
-          }
-          Object.assign(combinedData[dataIndex], item);
-        });
-      }
-    });
-
-    return combinedData;
-  };
+  useEffect(() => {
+    fetchMultiSeriesData();
+  }, [fetchMultiSeriesData]);
 
   const normalizeData = (data: number[]): number[] => {
     if (data.length === 0) return [];

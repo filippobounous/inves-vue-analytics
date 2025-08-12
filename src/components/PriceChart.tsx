@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   LineChart,
@@ -23,61 +23,64 @@ export function PriceChart({ portfolioCodes, securityCodes }: PriceChartProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const transformPriceData = useCallback(
+    (apiData: any) => {
+      // This is a placeholder transformation - adjust based on actual API response structure
+      if (!apiData || !Array.isArray(apiData)) {
+        return [];
+      }
+
+      return apiData.map((item: any, index: number) => ({
+        date: item.date || `Day ${index + 1}`,
+        ...portfolioCodes.reduce(
+          (acc, code) => ({
+            ...acc,
+            [code]: item[code] || Math.random() * 1000 + 100,
+          }),
+          {},
+        ),
+        ...securityCodes.reduce(
+          (acc, code) => ({
+            ...acc,
+            [code]: item[code] || Math.random() * 200 + 50,
+          }),
+          {},
+        ),
+      }));
+    },
+    [portfolioCodes, securityCodes],
+  );
+
+  const fetchPrices = useCallback(async () => {
     if (portfolioCodes.length === 0 && securityCodes.length === 0) {
       setData([]);
       return;
     }
 
-    const fetchPrices = async () => {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      const response = await investmentApi.getPrices({
-        portfolio_codes: portfolioCodes.length > 0 ? portfolioCodes : undefined,
-        security_codes: securityCodes.length > 0 ? securityCodes : undefined,
-        local_only: true,
-        intraday: false,
-      });
+    const response = await investmentApi.getPrices({
+      portfolio_codes: portfolioCodes.length > 0 ? portfolioCodes : undefined,
+      security_codes: securityCodes.length > 0 ? securityCodes : undefined,
+      local_only: true,
+      intraday: false,
+    });
 
-      setLoading(false);
+    setLoading(false);
 
-      if (response.success && response.data) {
-        // Transform API response to chart data format
-        const chartData = transformPriceData(response.data);
-        setData(chartData);
-      } else {
-        setError(response.error || 'Failed to fetch price data');
-      }
-    };
-
-    fetchPrices();
-  }, [portfolioCodes, securityCodes]);
-
-  const transformPriceData = (apiData: any) => {
-    // This is a placeholder transformation - adjust based on actual API response structure
-    if (!apiData || !Array.isArray(apiData)) {
-      return [];
+    if (response.success && response.data) {
+      // Transform API response to chart data format
+      const chartData = transformPriceData(response.data);
+      setData(chartData);
+    } else {
+      setError(response.error || 'Failed to fetch price data');
     }
+  }, [portfolioCodes, securityCodes, transformPriceData]);
 
-    return apiData.map((item: any, index: number) => ({
-      date: item.date || `Day ${index + 1}`,
-      ...portfolioCodes.reduce(
-        (acc, code) => ({
-          ...acc,
-          [code]: item[code] || Math.random() * 1000 + 100,
-        }),
-        {},
-      ),
-      ...securityCodes.reduce(
-        (acc, code) => ({
-          ...acc,
-          [code]: item[code] || Math.random() * 200 + 50,
-        }),
-        {},
-      ),
-    }));
-  };
+  useEffect(() => {
+    fetchPrices();
+  }, [fetchPrices]);
 
   const getLineColor = (index: number) => {
     const colors = [

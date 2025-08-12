@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   LineChart,
@@ -32,16 +32,39 @@ export function ReturnsChart({
   const [useLnRet, setUseLnRet] = useState(false);
   const [winSize, setWinSize] = useState(30);
 
-  useEffect(() => {
+  const transformReturnsData = useCallback(
+    (apiData: any) => {
+      if (!apiData || !Array.isArray(apiData)) {
+        return [];
+      }
+
+      return apiData.map((item: any, index: number) => ({
+        date: item.date || `Day ${index + 1}`,
+        ...portfolioCodes.reduce(
+          (acc, code) => ({
+            ...acc,
+            [code]: item[code] || (Math.random() - 0.5) * 0.05,
+          }),
+          {},
+        ),
+        ...securityCodes.reduce(
+          (acc, code) => ({
+            ...acc,
+            [code]: item[code] || (Math.random() - 0.5) * 0.08,
+          }),
+          {},
+        ),
+      }));
+    },
+    [portfolioCodes, securityCodes],
+  );
+
+  const fetchReturns = useCallback(async () => {
     if (portfolioCodes.length === 0 && securityCodes.length === 0) {
       setData([]);
       return;
     }
 
-    fetchReturns();
-  }, [portfolioCodes, securityCodes]);
-
-  const fetchReturns = async () => {
     setLoading(true);
     setError(null);
 
@@ -61,31 +84,11 @@ export function ReturnsChart({
     } else {
       setError(response.error || 'Failed to fetch returns data');
     }
-  };
+  }, [portfolioCodes, securityCodes, useLnRet, winSize, transformReturnsData]);
 
-  const transformReturnsData = (apiData: any) => {
-    if (!apiData || !Array.isArray(apiData)) {
-      return [];
-    }
-
-    return apiData.map((item: any, index: number) => ({
-      date: item.date || `Day ${index + 1}`,
-      ...portfolioCodes.reduce(
-        (acc, code) => ({
-          ...acc,
-          [code]: item[code] || (Math.random() - 0.5) * 0.05,
-        }),
-        {},
-      ),
-      ...securityCodes.reduce(
-        (acc, code) => ({
-          ...acc,
-          [code]: item[code] || (Math.random() - 0.5) * 0.08,
-        }),
-        {},
-      ),
-    }));
-  };
+  useEffect(() => {
+    fetchReturns();
+  }, [fetchReturns]);
 
   const getLineColor = (index: number) => {
     const colors = [

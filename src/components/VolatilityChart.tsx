@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   LineChart,
@@ -38,16 +38,39 @@ export function VolatilityChart({
   const [rvModel, setRvModel] = useState('simple');
   const [rvWinSize, setRvWinSize] = useState(30);
 
-  useEffect(() => {
+  const transformVolatilityData = useCallback(
+    (apiData: any) => {
+      if (!apiData || !Array.isArray(apiData)) {
+        return [];
+      }
+
+      return apiData.map((item: any, index: number) => ({
+        date: item.date || `Day ${index + 1}`,
+        ...portfolioCodes.reduce(
+          (acc, code) => ({
+            ...acc,
+            [code]: item[code] || Math.random() * 0.3 + 0.1,
+          }),
+          {},
+        ),
+        ...securityCodes.reduce(
+          (acc, code) => ({
+            ...acc,
+            [code]: item[code] || Math.random() * 0.4 + 0.15,
+          }),
+          {},
+        ),
+      }));
+    },
+    [portfolioCodes, securityCodes],
+  );
+
+  const fetchVolatility = useCallback(async () => {
     if (portfolioCodes.length === 0 && securityCodes.length === 0) {
       setData([]);
       return;
     }
 
-    fetchVolatility();
-  }, [portfolioCodes, securityCodes]);
-
-  const fetchVolatility = async () => {
     setLoading(true);
     setError(null);
 
@@ -67,31 +90,17 @@ export function VolatilityChart({
     } else {
       setError(response.error || 'Failed to fetch volatility data');
     }
-  };
+  }, [
+    portfolioCodes,
+    securityCodes,
+    rvModel,
+    rvWinSize,
+    transformVolatilityData,
+  ]);
 
-  const transformVolatilityData = (apiData: any) => {
-    if (!apiData || !Array.isArray(apiData)) {
-      return [];
-    }
-
-    return apiData.map((item: any, index: number) => ({
-      date: item.date || `Day ${index + 1}`,
-      ...portfolioCodes.reduce(
-        (acc, code) => ({
-          ...acc,
-          [code]: item[code] || Math.random() * 0.3 + 0.1,
-        }),
-        {},
-      ),
-      ...securityCodes.reduce(
-        (acc, code) => ({
-          ...acc,
-          [code]: item[code] || Math.random() * 0.4 + 0.15,
-        }),
-        {},
-      ),
-    }));
-  };
+  useEffect(() => {
+    fetchVolatility();
+  }, [fetchVolatility]);
 
   const getLineColor = (index: number) => {
     const colors = [
