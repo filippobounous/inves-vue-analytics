@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,16 +41,34 @@ export function MetricsPanel({
   const [riskFreeRate, setRiskFreeRate] = useState(0.02);
   const [periodsPerYear, setPeriodsPerYear] = useState(252);
 
-  useEffect(() => {
+  const transformMetricsData = useCallback(
+    (apiData: any): Metric[] => {
+      const allCodes = [...portfolioCodes, ...securityCodes];
+
+      // Generate sample metrics if API data is not in expected format
+      if (!Array.isArray(apiData)) {
+        return allCodes.map((code) => ({
+          code,
+          sharpe_ratio: Math.random() * 2 - 0.5,
+          max_drawdown: -(Math.random() * 0.3 + 0.05),
+          volatility: Math.random() * 0.4 + 0.1,
+          annual_return: Math.random() * 0.3 - 0.1,
+          beta: Math.random() * 2 + 0.5,
+          alpha: Math.random() * 0.1 - 0.05,
+        }));
+      }
+
+      return apiData;
+    },
+    [portfolioCodes, securityCodes],
+  );
+
+  const fetchMetrics = useCallback(async () => {
     if (portfolioCodes.length === 0 && securityCodes.length === 0) {
       setMetrics([]);
       return;
     }
 
-    fetchMetrics();
-  }, [portfolioCodes, securityCodes]);
-
-  const fetchMetrics = async () => {
     setLoading(true);
     setError(null);
 
@@ -71,26 +89,18 @@ export function MetricsPanel({
     } else {
       setError(response.error || 'Failed to fetch metrics');
     }
-  };
+  }, [
+    portfolioCodes,
+    securityCodes,
+    metricWinSize,
+    riskFreeRate,
+    periodsPerYear,
+    transformMetricsData,
+  ]);
 
-  const transformMetricsData = (apiData: any): Metric[] => {
-    const allCodes = [...portfolioCodes, ...securityCodes];
-
-    // Generate sample metrics if API data is not in expected format
-    if (!Array.isArray(apiData)) {
-      return allCodes.map((code) => ({
-        code,
-        sharpe_ratio: Math.random() * 2 - 0.5,
-        max_drawdown: -(Math.random() * 0.3 + 0.05),
-        volatility: Math.random() * 0.4 + 0.1,
-        annual_return: Math.random() * 0.3 - 0.1,
-        beta: Math.random() * 2 + 0.5,
-        alpha: Math.random() * 0.1 - 0.05,
-      }));
-    }
-
-    return apiData;
-  };
+  useEffect(() => {
+    fetchMetrics();
+  }, [fetchMetrics]);
 
   const formatPercentage = (value: number | undefined) => {
     if (value === undefined || value === null) return 'N/A';

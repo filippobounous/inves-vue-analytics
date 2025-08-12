@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,16 +35,31 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
   const [confidenceLevel, setConfidenceLevel] = useState(0.95);
   const [method, setMethod] = useState('historical');
 
-  useEffect(() => {
+  const transformVarData = useCallback(
+    (apiData: any): VarData[] => {
+      const allCodes = [...portfolioCodes, ...securityCodes];
+
+      // Generate sample VaR data if API data is not in expected format
+      if (!Array.isArray(apiData)) {
+        return allCodes.map((code) => ({
+          code,
+          var_value: -(Math.random() * 0.15 + 0.02), // Negative VaR values
+          confidence_level: confidenceLevel,
+          method,
+        }));
+      }
+
+      return apiData;
+    },
+    [portfolioCodes, securityCodes, confidenceLevel, method],
+  );
+
+  const fetchVaR = useCallback(async () => {
     if (portfolioCodes.length === 0 && securityCodes.length === 0) {
       setVarData([]);
       return;
     }
 
-    fetchVaR();
-  }, [portfolioCodes, securityCodes]);
-
-  const fetchVaR = async () => {
     setLoading(true);
     setError(null);
 
@@ -65,23 +80,18 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
     } else {
       setError(response.error || 'Failed to fetch VaR data');
     }
-  };
+  }, [
+    portfolioCodes,
+    securityCodes,
+    varWinSize,
+    confidenceLevel,
+    method,
+    transformVarData,
+  ]);
 
-  const transformVarData = (apiData: any): VarData[] => {
-    const allCodes = [...portfolioCodes, ...securityCodes];
-
-    // Generate sample VaR data if API data is not in expected format
-    if (!Array.isArray(apiData)) {
-      return allCodes.map((code) => ({
-        code,
-        var_value: -(Math.random() * 0.15 + 0.02), // Negative VaR values
-        confidence_level: confidenceLevel,
-        method,
-      }));
-    }
-
-    return apiData;
-  };
+  useEffect(() => {
+    fetchVaR();
+  }, [fetchVaR]);
 
   const formatPercentage = (value: number) => {
     return `${(value * 100).toFixed(2)}%`;

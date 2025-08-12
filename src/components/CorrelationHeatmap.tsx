@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,17 +36,38 @@ export function CorrelationHeatmap({
   const [window, setWindow] = useState(252);
   const [lag, setLag] = useState(0);
 
-  useEffect(() => {
+  const transformCorrelationData = useCallback(
+    (apiData: any) => {
+      const allCodes = [...portfolioCodes, ...securityCodes];
+
+      // Generate sample correlation matrix if API data is not in expected format
+      if (!apiData || !apiData.matrix) {
+        const size = allCodes.length;
+        const matrix = Array(size)
+          .fill(null)
+          .map((_, i) =>
+            Array(size)
+              .fill(null)
+              .map((_, j) => {
+                if (i === j) return 1;
+                return Math.random() * 2 - 1; // Random correlation between -1 and 1
+              }),
+          );
+        return { matrix, labels: allCodes };
+      }
+
+      return { matrix: apiData.matrix, labels: apiData.labels || allCodes };
+    },
+    [portfolioCodes, securityCodes],
+  );
+
+  const fetchCorrelations = useCallback(async () => {
     if (portfolioCodes.length === 0 && securityCodes.length === 0) {
       setCorrelationMatrix([]);
       setLabels([]);
       return;
     }
 
-    fetchCorrelations();
-  }, [portfolioCodes, securityCodes]);
-
-  const fetchCorrelations = async () => {
     setLoading(true);
     setError(null);
 
@@ -72,29 +93,21 @@ export function CorrelationHeatmap({
     } else {
       setError(response.error || 'Failed to fetch correlation data');
     }
-  };
+  }, [
+    portfolioCodes,
+    securityCodes,
+    useReturns,
+    logReturns,
+    retWinSize,
+    corrModel,
+    window,
+    lag,
+    transformCorrelationData,
+  ]);
 
-  const transformCorrelationData = (apiData: any) => {
-    const allCodes = [...portfolioCodes, ...securityCodes];
-
-    // Generate sample correlation matrix if API data is not in expected format
-    if (!apiData || !apiData.matrix) {
-      const size = allCodes.length;
-      const matrix = Array(size)
-        .fill(null)
-        .map((_, i) =>
-          Array(size)
-            .fill(null)
-            .map((_, j) => {
-              if (i === j) return 1;
-              return Math.random() * 2 - 1; // Random correlation between -1 and 1
-            }),
-        );
-      return { matrix, labels: allCodes };
-    }
-
-    return { matrix: apiData.matrix, labels: apiData.labels || allCodes };
-  };
+  useEffect(() => {
+    fetchCorrelations();
+  }, [fetchCorrelations]);
 
   const getCorrelationColor = (value: number) => {
     if (value > 0.7) return 'bg-green-500';
