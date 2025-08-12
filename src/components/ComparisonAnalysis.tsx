@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ScatterChart,
   Scatter,
@@ -8,25 +8,25 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from "recharts";
-import { Network, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+} from 'recharts';
+import { Network, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { investmentApi, type ApiResponse } from "@/services/api";
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { investmentApi, type ApiResponse } from '@/services/api';
 
 interface ComparisonAnalysisProps {
   portfolioCodes: string[];
   securityCodes: string[];
 }
 
-type AnalysisType = "prices" | "returns" | "volatility";
+type AnalysisType = 'prices' | 'returns' | 'volatility';
 
 interface AnalysisSeries {
   date?: string;
@@ -47,8 +47,8 @@ export function ComparisonAnalysis({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [xAxisType, setXAxisType] = useState<AnalysisType>("prices");
-  const [yAxisType, setYAxisType] = useState<AnalysisType>("volatility");
+  const [xAxisType, setXAxisType] = useState<AnalysisType>('prices');
+  const [yAxisType, setYAxisType] = useState<AnalysisType>('volatility');
   const [selectedEntities, setSelectedEntities] = useState<string[]>([]);
 
   const allEntities = useMemo(
@@ -79,22 +79,22 @@ export function ComparisonAnalysis({
       };
 
       switch (analysisType) {
-        case "prices":
+        case 'prices':
           return investmentApi.getPrices(params);
-        case "returns":
+        case 'returns':
           return investmentApi.getReturns({
             ...params,
             use_ln_ret: false,
             win_size: 30,
           });
-        case "volatility":
+        case 'volatility':
           return investmentApi.getRealisedVolatility({
             ...params,
-            rv_model: "simple",
+            rv_model: 'simple',
             rv_win_size: 30,
           });
         default:
-          return { success: false, error: "Unknown analysis type" };
+          return { success: false, error: 'Unknown analysis type' };
       }
     },
     [selectedEntities, portfolioCodes, securityCodes],
@@ -108,10 +108,10 @@ export function ComparisonAnalysis({
         // Calculate average values for each entity
         const xValues = xData
           .map((item) => item[entity])
-          .filter((v): v is number => typeof v === "number");
+          .filter((v): v is number => typeof v === 'number');
         const yValues = yData
           .map((item) => item[entity])
-          .filter((v): v is number => typeof v === "number");
+          .filter((v): v is number => typeof v === 'number');
 
         if (xValues.length > 0 && yValues.length > 0) {
           const avgX =
@@ -152,10 +152,10 @@ export function ComparisonAnalysis({
         const combinedData = combineAnalysisData(xDataArray, yDataArray);
         setData(combinedData);
       } else {
-        setError("Failed to fetch comparison data");
+        setError('Failed to fetch comparison data');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch data");
+      setError(err instanceof Error ? err.message : 'Failed to fetch data');
     } finally {
       setLoading(false);
     }
@@ -270,11 +270,11 @@ export function ComparisonAnalysis({
                 fontSize={12}
               />
               <Tooltip
-                cursor={{ strokeDasharray: "3 3" }}
+                cursor={{ strokeDasharray: '3 3' }}
                 contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px',
                 }}
                 formatter={(value: number, name: string): [string, string] => [
                   value.toFixed(4),

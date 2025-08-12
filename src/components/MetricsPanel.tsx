@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   BarChart,
   Loader2,
@@ -10,8 +10,8 @@ import {
   TrendingDown,
   AlertTriangle,
   Target,
-} from "lucide-react";
-import { investmentApi } from "@/services/api";
+} from 'lucide-react';
+import { investmentApi } from '@/services/api';
 
 interface MetricsPanelProps {
   portfolioCodes: string[];
@@ -69,7 +69,7 @@ export function MetricsPanel({
       const transformedMetrics = transformMetricsData(response.data);
       setMetrics(transformedMetrics);
     } else {
-      setError(response.error || "Failed to fetch metrics");
+      setError(response.error || 'Failed to fetch metrics');
     }
   };
 
@@ -93,25 +93,25 @@ export function MetricsPanel({
   };
 
   const formatPercentage = (value: number | undefined) => {
-    if (value === undefined || value === null) return "N/A";
+    if (value === undefined || value === null) return 'N/A';
     return `${(value * 100).toFixed(2)}%`;
   };
 
   const formatNumber = (value: number | undefined, decimals = 3) => {
-    if (value === undefined || value === null) return "N/A";
+    if (value === undefined || value === null) return 'N/A';
     return value.toFixed(decimals);
   };
 
   const getMetricColor = (
     value: number | undefined,
-    type: "positive" | "negative",
+    type: 'positive' | 'negative',
   ) => {
-    if (value === undefined || value === null) return "text-muted-foreground";
+    if (value === undefined || value === null) return 'text-muted-foreground';
 
-    if (type === "positive") {
-      return value > 0 ? "text-success" : "text-destructive";
+    if (type === 'positive') {
+      return value > 0 ? 'text-success' : 'text-destructive';
     } else {
-      return value < 0 ? "text-destructive" : "text-success";
+      return value < 0 ? 'text-destructive' : 'text-success';
     }
   };
 
@@ -204,7 +204,7 @@ export function MetricsPanel({
                           Sharpe Ratio
                         </p>
                         <p
-                          className={`font-mono text-sm font-medium ${getMetricColor(metric.sharpe_ratio, "positive")}`}
+                          className={`font-mono text-sm font-medium ${getMetricColor(metric.sharpe_ratio, 'positive')}`}
                         >
                           {formatNumber(metric.sharpe_ratio)}
                         </p>
@@ -218,7 +218,7 @@ export function MetricsPanel({
                           Annual Return
                         </p>
                         <p
-                          className={`font-mono text-sm font-medium ${getMetricColor(metric.annual_return, "positive")}`}
+                          className={`font-mono text-sm font-medium ${getMetricColor(metric.annual_return, 'positive')}`}
                         >
                           {formatPercentage(metric.annual_return)}
                         </p>
@@ -264,7 +264,7 @@ export function MetricsPanel({
                       <div>
                         <p className="text-xs text-muted-foreground">Alpha</p>
                         <p
-                          className={`font-mono text-sm font-medium ${getMetricColor(metric.alpha, "positive")}`}
+                          className={`font-mono text-sm font-medium ${getMetricColor(metric.alpha, 'positive')}`}
                         >
                           {formatPercentage(metric.alpha)}
                         </p>

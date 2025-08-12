@@ -1,35 +1,35 @@
-import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { Moon, Sun } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   useEffect(() => {
     const root = window.document.documentElement;
     const initialTheme =
-      (localStorage.getItem("theme") as "dark" | "light") || "dark";
+      (localStorage.getItem('theme') as 'dark' | 'light') || 'dark';
 
     setTheme(initialTheme);
 
-    if (initialTheme === "dark") {
-      root.classList.add("dark");
+    if (initialTheme === 'dark') {
+      root.classList.add('dark');
     } else {
-      root.classList.remove("dark");
+      root.classList.remove('dark');
     }
   }, []);
 
   const toggleTheme = () => {
     const root = window.document.documentElement;
-    const newTheme = theme === "dark" ? "light" : "dark";
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
 
     setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
+    localStorage.setItem('theme', newTheme);
 
-    if (newTheme === "dark") {
-      root.classList.add("dark");
+    if (newTheme === 'dark') {
+      root.classList.add('dark');
     } else {
-      root.classList.remove("dark");
+      root.classList.remove('dark');
     }
   };
 
@@ -40,7 +40,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       className="relative overflow-hidden transition-all duration-300 hover:bg-accent/20"
     >
-      {theme === "light" ? (
+      {theme === 'light' ? (
         <Moon className="h-4 w-4 transition-all" />
       ) : (
         <Sun className="h-4 w-4 transition-all" />

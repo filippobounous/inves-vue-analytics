@@ -1,20 +1,31 @@
-
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { BarChart3, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { investmentApi } from "@/services/api";
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
+import { BarChart3, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { investmentApi } from '@/services/api';
 
 interface ReturnsChartProps {
   portfolioCodes: string[];
   securityCodes: string[];
 }
 
-export function ReturnsChart({ portfolioCodes, securityCodes }: ReturnsChartProps) {
+export function ReturnsChart({
+  portfolioCodes,
+  securityCodes,
+}: ReturnsChartProps) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +59,7 @@ export function ReturnsChart({ portfolioCodes, securityCodes }: ReturnsChartProp
       const chartData = transformReturnsData(response.data);
       setData(chartData);
     } else {
-      setError(response.error || "Failed to fetch returns data");
+      setError(response.error || 'Failed to fetch returns data');
     }
   };
 
@@ -59,19 +70,32 @@ export function ReturnsChart({ portfolioCodes, securityCodes }: ReturnsChartProp
 
     return apiData.map((item: any, index: number) => ({
       date: item.date || `Day ${index + 1}`,
-      ...portfolioCodes.reduce((acc, code) => ({
-        ...acc,
-        [code]: item[code] || (Math.random() - 0.5) * 0.05
-      }), {}),
-      ...securityCodes.reduce((acc, code) => ({
-        ...acc,
-        [code]: item[code] || (Math.random() - 0.5) * 0.08
-      }), {}),
+      ...portfolioCodes.reduce(
+        (acc, code) => ({
+          ...acc,
+          [code]: item[code] || (Math.random() - 0.5) * 0.05,
+        }),
+        {},
+      ),
+      ...securityCodes.reduce(
+        (acc, code) => ({
+          ...acc,
+          [code]: item[code] || (Math.random() - 0.5) * 0.08,
+        }),
+        {},
+      ),
     }));
   };
 
   const getLineColor = (index: number) => {
-    const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', 'hsl(var(--chart-6))'];
+    const colors = [
+      'hsl(var(--chart-1))',
+      'hsl(var(--chart-2))',
+      'hsl(var(--chart-3))',
+      'hsl(var(--chart-4))',
+      'hsl(var(--chart-5))',
+      'hsl(var(--chart-6))',
+    ];
     return colors[index % colors.length];
   };
 
@@ -85,7 +109,9 @@ export function ReturnsChart({ portfolioCodes, securityCodes }: ReturnsChartProp
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Select portfolios or securities to view returns analysis</p>
+          <p className="text-muted-foreground">
+            Select portfolios or securities to view returns analysis
+          </p>
         </CardContent>
       </Card>
     );
@@ -135,23 +161,29 @@ export function ReturnsChart({ portfolioCodes, securityCodes }: ReturnsChartProp
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis 
-                dataKey="date" 
+            <LineChart
+              data={data}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--border))"
+              />
+              <XAxis
+                dataKey="date"
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
               />
-              <YAxis 
+              <YAxis
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
                 tickFormatter={(value) => `${(value * 100).toFixed(2)}%`}
               />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
                   backgroundColor: 'hsl(var(--card))',
                   border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
+                  borderRadius: '8px',
                 }}
                 formatter={(value: any) => [`${(value * 100).toFixed(3)}%`, '']}
               />
