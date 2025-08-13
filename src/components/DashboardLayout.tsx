@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useSettings } from '@/contexts/SettingsContext';
+import { cn } from '@/lib/utils';
 
 const navigationItems = [
   { name: 'Portfolio & Securities', href: '/dashboard', icon: LayoutDashboard },
@@ -81,9 +82,10 @@ export function DashboardLayout() {
       <div className="flex">
         {/* Sidebar */}
         <aside
-          className={`${
-            sidebarCollapsed ? 'w-16' : 'w-64'
-          } border-r bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 transition-all duration-300 flex flex-col`}
+          className={cn(
+            sidebarCollapsed ? 'w-16' : 'w-64',
+            'border-r bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 transition-all duration-300 flex flex-col',
+          )}
         >
           {/* Main Navigation */}
           <nav className="flex-1 p-4 space-y-2">
