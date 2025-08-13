@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PriceChart } from './PriceChart';
 import { ReturnsChart } from './ReturnsChart';
 import { VolatilityChart } from './VolatilityChart';
@@ -15,7 +16,7 @@ import {
   generateMockReturnsData,
   generateMockVolatilityData,
 } from '@/services/testData';
-import { TrendingUp, BarChart3, Activity, Download } from 'lucide-react';
+import { TrendingUp, BarChart3, Activity, Download, FileText, Image } from 'lucide-react';
 
 interface ComparisonAnalysisProps {
   portfolioCodes: string[];
@@ -31,6 +32,7 @@ export function ComparisonAnalysis({
   securityCodes,
 }: ComparisonAnalysisProps) {
   const [activeTab, setActiveTab] = useState('prices');
+  const [baseCurrency, setBaseCurrency] = useState('USD');
   const { useTestData, defaultDateRange } = useSettings();
 
   const allCodes = [...portfolioCodes, ...securityCodes];
@@ -82,7 +84,7 @@ export function ComparisonAnalysis({
   };
 
   const pricesQuery = useQuery({
-    queryKey: ['comparison-prices', portfolioCodes, securityCodes, useTestData],
+    queryKey: ['comparison-prices', portfolioCodes, securityCodes, useTestData, baseCurrency],
     queryFn: async () => {
       if (useTestData) {
         return generateTestData('prices');
@@ -90,6 +92,7 @@ export function ComparisonAnalysis({
       const pricesResponse = await investmentApi.getPrices({
         portfolio_codes: portfolioCodes.length > 0 ? portfolioCodes : undefined,
         security_codes: securityCodes.length > 0 ? securityCodes : undefined,
+        currency: baseCurrency,
       });
       return {
         ...pricesResponse,
@@ -134,6 +137,29 @@ export function ComparisonAnalysis({
     },
     enabled: allCodes.length > 0,
   });
+
+  const exportData = (format: 'csv' | 'pdf' | 'png') => {
+    const currentData = getCurrentData();
+    console.log(`Exporting data as ${format}:`, currentData);
+    
+    if (format === 'csv') {
+      // Export as CSV timeseries
+      const csvContent = [
+        ['Date', ...allCodes].join(','),
+        ...currentData.map(row => [
+          row.date,
+          ...allCodes.map(code => row[code] || '')
+        ].join(','))
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `comparison_${activeTab}_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+  };
 
   if (allCodes.length === 0) {
     return (
@@ -194,13 +220,44 @@ export function ComparisonAnalysis({
               )}
             </CardTitle>
             <div className="flex items-center gap-2">
-              <div className="text-sm text-muted-foreground">
-                {allCodes.length} selected
+              <Select value={baseCurrency} onValueChange={setBaseCurrency}>
+                <SelectTrigger className="w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USD">USD</SelectItem>
+                  <SelectItem value="EUR">EUR</SelectItem>
+                  <SelectItem value="GBP">GBP</SelectItem>
+                  <SelectItem value="JPY">JPY</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <div className="flex items-center gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => exportData('csv')}
+                >
+                  <FileText className="h-4 w-4 mr-1" />
+                  CSV
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => exportData('pdf')}
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  PDF
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => exportData('png')}
+                >
+                  <Image className="h-4 w-4 mr-1" />
+                  PNG
+                </Button>
               </div>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
             </div>
           </div>
         </CardHeader>

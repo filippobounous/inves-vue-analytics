@@ -1,173 +1,132 @@
 
 import { useState } from 'react';
-import { Outlet, useLocation, Link } from 'react-router-dom';
+import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
 import { 
-  PieChart, 
+  LayoutDashboard, 
   BarChart3, 
-  Settings, 
   TrendingUp, 
   Upload, 
-  Shuffle,
-  Building,
-  Calculator,
+  Rebalance,
+  Settings,
   Menu,
   X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { cn } from '@/lib/utils';
+import { useSettings } from '@/contexts/SettingsContext';
 
-const navigation = [
-  {
-    name: 'Portfolio & Securities',
-    href: '/dashboard',
-    icon: PieChart,
-    description: 'View detailed portfolio and security information'
-  },
-  {
-    name: 'Entity Comparison',
-    href: '/dashboard/comparison',
-    icon: BarChart3,
-    description: 'Compare and analyze multiple entities'
-  },
-  {
-    name: 'Backtesting',
-    href: '/dashboard/backtest',
-    icon: Calculator,
-    description: 'Run historical performance backtests'
-  },
-  {
-    name: 'Data Uploads',
-    href: '/dashboard/uploads',
-    icon: Upload,
-    description: 'Upload transactions and portfolio data'
-  },
-  {
-    name: 'Rebalancing',
-    href: '/dashboard/rebalance',
-    icon: Shuffle,
-    description: 'Optimize portfolio allocations'
-  },
-  {
-    name: 'Settings',
-    href: '/dashboard/settings',
-    icon: Settings,
-    description: 'Configure preferences and options'
-  }
+const navigationItems = [
+  { name: 'Portfolio & Securities', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Entity Comparison', href: '/dashboard/comparison', icon: BarChart3 },
+  { name: 'Backtesting Tool', href: '/dashboard/backtest', icon: TrendingUp },
+  { name: 'Data Uploads', href: '/dashboard/uploads', icon: Upload },
+  { name: 'Rebalancing Tool', href: '/dashboard/rebalance', icon: Rebalance },
 ];
 
 export function DashboardLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { useTestData } = useSettings();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const isActive = (href: string) => {
+    return location.pathname === href || (href === '/dashboard' && location.pathname === '/dashboard');
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden" 
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-72 transform bg-card/95 backdrop-blur-xl border-r border-border/50 transition-transform duration-300 ease-in-out lg:translate-x-0",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex h-16 items-center justify-between px-6 border-b border-border/50">
-            <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 bg-gradient-to-br from-primary to-primary/60 rounded-lg flex items-center justify-center">
-                <Building className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-foreground">Murgenere</h1>
-                <p className="text-xs text-muted-foreground">Investment Analytics</p>
-              </div>
-            </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
+        <div className="flex h-16 items-center justify-between px-6">
+          <div className="flex items-center gap-4">
             <Button
               variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(false)}
+              size="icon"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className="lg:hidden"
             >
-              <X className="h-4 w-4" />
+              {sidebarCollapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}
             </Button>
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <h1 className="text-xl font-semibold">Murgenere Analytics</h1>
+            </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 space-y-2 p-4">
-            {navigation.map((item) => {
-              const isActive = location.pathname === item.href || 
-                (item.href === '/dashboard' && location.pathname === '/');
-              
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={cn(
-                    "flex items-start space-x-3 rounded-xl p-3 text-sm transition-all duration-200 hover:bg-muted/50",
-                    isActive 
-                      ? "bg-primary/10 text-primary border border-primary/20" 
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <item.icon className={cn(
-                    "h-5 w-5 mt-0.5 flex-shrink-0",
-                    isActive ? "text-primary" : "text-muted-foreground"
-                  )} />
-                  <div className="flex-1 min-w-0">
-                    <div className={cn(
-                      "font-medium truncate",
-                      isActive ? "text-primary" : "text-foreground"
-                    )}>
-                      {item.name}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {item.description}
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="flex items-center gap-4">
+            {useTestData && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-amber-100 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg">
+                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-amber-700 dark:text-amber-300">Test Data Mode</span>
+              </div>
+            )}
+            <div className="text-sm text-muted-foreground">
+              Last Updated: {new Date().toLocaleTimeString()}
+            </div>
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className={`${
+          sidebarCollapsed ? 'w-16' : 'w-64'
+        } border-r bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 transition-all duration-300 flex flex-col`}>
+          
+          {/* Main Navigation */}
+          <nav className="flex-1 p-4 space-y-2">
+            {navigationItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                  isActive(item.href)
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                } ${sidebarCollapsed ? 'justify-center' : ''}`}
+                title={sidebarCollapsed ? item.name : undefined}
+              >
+                <item.icon className="h-5 w-5 flex-shrink-0" />
+                {!sidebarCollapsed && <span className="font-medium">{item.name}</span>}
+              </Link>
+            ))}
           </nav>
 
-          {/* Footer */}
-          <div className="p-4 border-t border-border/50">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Theme</span>
-              <ThemeToggle />
-            </div>
+          {/* Settings at bottom */}
+          <div className="p-4 border-t">
+            <Link
+              to="/dashboard/settings"
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                location.pathname === '/dashboard/settings'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+              } ${sidebarCollapsed ? 'justify-center' : ''}`}
+              title={sidebarCollapsed ? 'Settings' : undefined}
+            >
+              <Settings className="h-5 w-5 flex-shrink-0" />
+              {!sidebarCollapsed && <span className="font-medium">Settings</span>}
+            </Link>
           </div>
-        </div>
-      </div>
 
-      {/* Main content */}
-      <div className="lg:pl-72">
-        {/* Top bar */}
-        <div className="sticky top-0 z-30 h-16 bg-background/95 backdrop-blur-xl border-b border-border/50">
-          <div className="flex h-full items-center justify-between px-6">
+          {/* Collapse Toggle (Desktop only) */}
+          <div className="hidden lg:block p-4 border-t">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className={`w-full ${sidebarCollapsed ? 'px-2' : ''}`}
             >
-              <Menu className="h-5 w-5" />
+              {sidebarCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+              {!sidebarCollapsed && <span className="ml-2">Collapse</span>}
             </Button>
-            
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-muted-foreground">
-                Last updated: {new Date().toLocaleTimeString()}
-              </div>
-            </div>
           </div>
-        </div>
+        </aside>
 
-        {/* Page content */}
-        <main className="p-6">
+        {/* Main Content */}
+        <main className="flex-1 p-6">
           <Outlet />
         </main>
       </div>

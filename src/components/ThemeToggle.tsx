@@ -1,3 +1,4 @@
+
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
@@ -38,7 +39,7 @@ export function ThemeToggle() {
       variant="outline"
       size="icon"
       onClick={toggleTheme}
-      className="relative overflow-hidden transition-all duration-300 hover:bg-accent/20"
+      className="relative overflow-hidden transition-all duration-300 hover:bg-accent/20 border-border/50"
     >
       {theme === 'light' ? (
         <Moon className="h-4 w-4 transition-all" />

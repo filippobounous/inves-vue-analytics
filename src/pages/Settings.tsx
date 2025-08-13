@@ -1,25 +1,38 @@
 
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 import { useSettings } from '@/contexts/SettingsContext';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon, ArrowLeft } from 'lucide-react';
 
 const Settings = () => {
+  const navigate = useNavigate();
   const { useTestData, updateSettings } = useSettings();
 
   const handleTestDataToggle = (checked: boolean) => {
     updateSettings({ useTestData: checked });
   };
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground mt-1">
-          Configure your preferences and application settings
-        </p>
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm" onClick={handleBack}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+          <p className="text-muted-foreground mt-1">
+            Configure your preferences and application settings
+          </p>
+        </div>
       </div>
 
       {/* Advanced Settings */}
