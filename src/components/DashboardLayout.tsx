@@ -46,6 +46,7 @@ export function DashboardLayout() {
               size="icon"
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className="lg:hidden"
+              aria-label="Toggle navigation"
             >
               {sidebarCollapsed ? (
                 <Menu className="h-5 w-5" />
