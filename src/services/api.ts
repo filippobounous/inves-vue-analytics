@@ -46,7 +46,7 @@ class InvestmentApiService {
 
   // Portfolio endpoints
   async getPortfolio(code: string) {
-    return this.makeRequest(`/core/portfolio/${code}`);
+    return this.makeRequest(`/core/portfolio/${encodeURIComponent(code)}`);
   }
 
   async getPortfolios(codes: string[]) {
@@ -58,7 +58,7 @@ class InvestmentApiService {
 
   // Security endpoints
   async getSecurity(code: string) {
-    return this.makeRequest(`/core/security/${code}`);
+    return this.makeRequest(`/core/security/${encodeURIComponent(code)}`);
   }
 
   async getSecurities(codes: string[]) {
