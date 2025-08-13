@@ -1,11 +1,16 @@
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PriceChart } from './PriceChart';
 import { ReturnsChart } from './ReturnsChart';
 import { VolatilityChart } from './VolatilityChart';
@@ -16,7 +21,7 @@ import {
   generateMockReturnsData,
   generateMockVolatilityData,
 } from '@/services/testData';
-import { TrendingUp, BarChart3, Activity, Download, FileText, Image } from 'lucide-react';
+import { TrendingUp, BarChart3, Activity, FileText } from 'lucide-react';
 
 interface ComparisonAnalysisProps {
   portfolioCodes: string[];
@@ -39,9 +44,9 @@ export function ComparisonAnalysis({
 
   const combineAnalysisData = (data: AnalysisSeries[]): AnalysisSeries[] => {
     if (!Array.isArray(data) || data.length === 0) return [];
-    
+
     const dateMap = new Map();
-    
+
     data.forEach((series) => {
       if (Array.isArray(series)) {
         series.forEach((point: any) => {
@@ -84,7 +89,13 @@ export function ComparisonAnalysis({
   };
 
   const pricesQuery = useQuery({
-    queryKey: ['comparison-prices', portfolioCodes, securityCodes, useTestData, baseCurrency],
+    queryKey: [
+      'comparison-prices',
+      portfolioCodes,
+      securityCodes,
+      useTestData,
+      baseCurrency,
+    ],
     queryFn: async () => {
       if (useTestData) {
         return generateTestData('prices');
@@ -96,14 +107,19 @@ export function ComparisonAnalysis({
       });
       return {
         ...pricesResponse,
-        data: Array.isArray(pricesResponse.data) ? pricesResponse.data : []
+        data: Array.isArray(pricesResponse.data) ? pricesResponse.data : [],
       };
     },
     enabled: allCodes.length > 0,
   });
 
   const returnsQuery = useQuery({
-    queryKey: ['comparison-returns', portfolioCodes, securityCodes, useTestData],
+    queryKey: [
+      'comparison-returns',
+      portfolioCodes,
+      securityCodes,
+      useTestData,
+    ],
     queryFn: async () => {
       if (useTestData) {
         return generateTestData('returns');
@@ -114,14 +130,19 @@ export function ComparisonAnalysis({
       });
       return {
         ...returnsResponse,
-        data: Array.isArray(returnsResponse.data) ? returnsResponse.data : []
+        data: Array.isArray(returnsResponse.data) ? returnsResponse.data : [],
       };
     },
     enabled: allCodes.length > 0,
   });
 
   const volatilityQuery = useQuery({
-    queryKey: ['comparison-volatility', portfolioCodes, securityCodes, useTestData],
+    queryKey: [
+      'comparison-volatility',
+      portfolioCodes,
+      securityCodes,
+      useTestData,
+    ],
     queryFn: async () => {
       if (useTestData) {
         return generateTestData('volatility');
@@ -132,33 +153,32 @@ export function ComparisonAnalysis({
       });
       return {
         ...volatilityResponse,
-        data: Array.isArray(volatilityResponse.data) ? volatilityResponse.data : []
+        data: Array.isArray(volatilityResponse.data)
+          ? volatilityResponse.data
+          : [],
       };
     },
     enabled: allCodes.length > 0,
   });
 
-  const exportData = (format: 'csv' | 'pdf' | 'png') => {
+  const exportData = (format: 'csv') => {
     const currentData = getCurrentData();
     console.log(`Exporting data as ${format}:`, currentData);
-    
-    if (format === 'csv') {
-      // Export as CSV timeseries
-      const csvContent = [
-        ['Date', ...allCodes].join(','),
-        ...currentData.map(row => [
-          row.date,
-          ...allCodes.map(code => row[code] || '')
-        ].join(','))
-      ].join('\n');
-      
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `comparison_${activeTab}_${new Date().toISOString().split('T')[0]}.csv`;
-      a.click();
-    }
+
+    // Export as CSV timeseries
+    const csvContent = [
+      ['Date', ...allCodes].join(','),
+      ...currentData.map((row) =>
+        [row.date, ...allCodes.map((code) => row[code] || '')].join(','),
+      ),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `comparison_${activeTab}_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
   };
 
   if (allCodes.length === 0) {
@@ -231,31 +251,15 @@ export function ComparisonAnalysis({
                   <SelectItem value="JPY">JPY</SelectItem>
                 </SelectContent>
               </Select>
-              
+
               <div className="flex items-center gap-1">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => exportData('csv')}
                 >
                   <FileText className="h-4 w-4 mr-1" />
                   CSV
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => exportData('pdf')}
-                >
-                  <Download className="h-4 w-4 mr-1" />
-                  PDF
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => exportData('png')}
-                >
-                  <Image className="h-4 w-4 mr-1" />
-                  PNG
                 </Button>
               </div>
             </div>
@@ -272,7 +276,10 @@ export function ComparisonAnalysis({
                 <BarChart3 className="h-4 w-4" />
                 Returns
               </TabsTrigger>
-              <TabsTrigger value="volatility" className="flex items-center gap-2">
+              <TabsTrigger
+                value="volatility"
+                className="flex items-center gap-2"
+              >
                 <Activity className="h-4 w-4" />
                 Volatility
               </TabsTrigger>
