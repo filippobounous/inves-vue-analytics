@@ -18,12 +18,15 @@ interface VarPanelProps {
   securityCodes: string[];
 }
 
-interface VarData {
+// Data structure returned by the VaR API
+interface ApiVarData {
   code: string;
   var_value: number;
   confidence_level: number;
   method: string;
 }
+
+type VarData = ApiVarData;
 
 export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
   const [varData, setVarData] = useState<VarData[]>([]);
@@ -36,11 +39,20 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
   const [method, setMethod] = useState('historical');
 
   const transformVarData = useCallback(
-    (apiData: any): VarData[] => {
+    (apiData: ApiVarData[]): VarData[] => {
       const allCodes = [...portfolioCodes, ...securityCodes];
 
-      // Generate sample VaR data if API data is not in expected format
-      if (!Array.isArray(apiData)) {
+      const isValidData =
+        Array.isArray(apiData) &&
+        apiData.every(
+          (item) =>
+            typeof item.code === 'string' &&
+            typeof item.var_value === 'number' &&
+            typeof item.confidence_level === 'number' &&
+            typeof item.method === 'string',
+        );
+
+      if (!isValidData) {
         return allCodes.map((code) => ({
           code,
           var_value: -(Math.random() * 0.15 + 0.02), // Negative VaR values
