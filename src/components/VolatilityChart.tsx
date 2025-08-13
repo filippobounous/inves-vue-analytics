@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   LineChart,
@@ -11,97 +10,19 @@ import {
   Legend,
 } from 'recharts';
 import { Activity, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { investmentApi } from '@/services/api';
+import { ChartDataPoint } from '@/types/charts';
 
 interface VolatilityChartProps {
-  portfolioCodes: string[];
-  securityCodes: string[];
+  data: ChartDataPoint[];
+  selectedCodes: string[];
+  loading: boolean;
 }
 
 export function VolatilityChart({
-  portfolioCodes,
-  securityCodes,
+  data,
+  selectedCodes,
+  loading,
 }: VolatilityChartProps) {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [rvModel, setRvModel] = useState('simple');
-  const [rvWinSize, setRvWinSize] = useState(30);
-
-  const transformVolatilityData = useCallback(
-    (apiData: any) => {
-      if (!apiData || !Array.isArray(apiData)) {
-        return [];
-      }
-
-      return apiData.map((item: any, index: number) => ({
-        date: item.date || `Day ${index + 1}`,
-        ...portfolioCodes.reduce(
-          (acc, code) => ({
-            ...acc,
-            [code]: item[code] || Math.random() * 0.3 + 0.1,
-          }),
-          {},
-        ),
-        ...securityCodes.reduce(
-          (acc, code) => ({
-            ...acc,
-            [code]: item[code] || Math.random() * 0.4 + 0.15,
-          }),
-          {},
-        ),
-      }));
-    },
-    [portfolioCodes, securityCodes],
-  );
-
-  const fetchVolatility = useCallback(async () => {
-    if (portfolioCodes.length === 0 && securityCodes.length === 0) {
-      setData([]);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    const response = await investmentApi.getRealisedVolatility({
-      portfolio_codes: portfolioCodes.length > 0 ? portfolioCodes : undefined,
-      security_codes: securityCodes.length > 0 ? securityCodes : undefined,
-      rv_model: rvModel,
-      rv_win_size: rvWinSize,
-      local_only: true,
-    });
-
-    setLoading(false);
-
-    if (response.success && response.data) {
-      const chartData = transformVolatilityData(response.data);
-      setData(chartData);
-    } else {
-      setError(response.error || 'Failed to fetch volatility data');
-    }
-  }, [
-    portfolioCodes,
-    securityCodes,
-    rvModel,
-    rvWinSize,
-    transformVolatilityData,
-  ]);
-
-  useEffect(() => {
-    fetchVolatility();
-  }, [fetchVolatility]);
-
   const getLineColor = (index: number) => {
     const colors = [
       'hsl(var(--chart-1))',
@@ -114,7 +35,7 @@ export function VolatilityChart({
     return colors[index % colors.length];
   };
 
-  if (portfolioCodes.length === 0 && securityCodes.length === 0) {
+  if (selectedCodes.length === 0) {
     return (
       <Card className="chart-container">
         <CardHeader>
@@ -140,44 +61,10 @@ export function VolatilityChart({
           Realised Volatility
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex gap-4 items-end">
-          <div className="space-y-2">
-            <Label htmlFor="rvWinSize">Window Size</Label>
-            <Input
-              id="rvWinSize"
-              type="number"
-              value={rvWinSize}
-              onChange={(e) => setRvWinSize(Number(e.target.value))}
-              className="w-24 input-financial"
-              min="1"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="rvModel">Model</Label>
-            <Select value={rvModel} onValueChange={setRvModel}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="simple">Simple</SelectItem>
-                <SelectItem value="garch">GARCH</SelectItem>
-                <SelectItem value="ewma">EWMA</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Button onClick={fetchVolatility} disabled={loading}>
-            Update
-          </Button>
-        </div>
-
+      <CardContent>
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : error ? (
-          <div className="flex items-center justify-center h-64">
-            <p className="text-destructive">{error}</p>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={400}>
@@ -205,10 +92,13 @@ export function VolatilityChart({
                   border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
                 }}
-                formatter={(value: any) => [`${(value * 100).toFixed(2)}%`, '']}
+                formatter={(value: number) => [
+                  `${(value * 100).toFixed(2)}%`,
+                  '',
+                ]}
               />
               <Legend />
-              {[...portfolioCodes, ...securityCodes].map((code, index) => (
+              {selectedCodes.map((code, index) => (
                 <Line
                   key={code}
                   type="monotone"
