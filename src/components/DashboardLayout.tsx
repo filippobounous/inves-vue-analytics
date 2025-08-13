@@ -1,15 +1,14 @@
-
 import { useState } from 'react';
 import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  BarChart3, 
-  TrendingUp, 
-  Upload, 
-  Rebalance,
+import {
+  LayoutDashboard,
+  BarChart3,
+  TrendingUp,
+  Upload,
+  Shuffle,
   Settings,
   Menu,
-  X
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -20,7 +19,7 @@ const navigationItems = [
   { name: 'Entity Comparison', href: '/dashboard/comparison', icon: BarChart3 },
   { name: 'Backtesting Tool', href: '/dashboard/backtest', icon: TrendingUp },
   { name: 'Data Uploads', href: '/dashboard/uploads', icon: Upload },
-  { name: 'Rebalancing Tool', href: '/dashboard/rebalance', icon: Rebalance },
+  { name: 'Rebalancing Tool', href: '/dashboard/rebalance', icon: Shuffle },
 ];
 
 export function DashboardLayout() {
@@ -30,7 +29,10 @@ export function DashboardLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const isActive = (href: string) => {
-    return location.pathname === href || (href === '/dashboard' && location.pathname === '/dashboard');
+    return (
+      location.pathname === href ||
+      (href === '/dashboard' && location.pathname === '/dashboard')
+    );
   };
 
   return (
@@ -45,7 +47,11 @@ export function DashboardLayout() {
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className="lg:hidden"
             >
-              {sidebarCollapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}
+              {sidebarCollapsed ? (
+                <Menu className="h-5 w-5" />
+              ) : (
+                <X className="h-5 w-5" />
+              )}
             </Button>
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
@@ -59,7 +65,9 @@ export function DashboardLayout() {
             {useTestData && (
               <div className="flex items-center gap-2 px-3 py-1 bg-amber-100 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg">
                 <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-amber-700 dark:text-amber-300">Test Data Mode</span>
+                <span className="text-sm text-amber-700 dark:text-amber-300">
+                  Test Data Mode
+                </span>
               </div>
             )}
             <div className="text-sm text-muted-foreground">
@@ -72,10 +80,11 @@ export function DashboardLayout() {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className={`${
-          sidebarCollapsed ? 'w-16' : 'w-64'
-        } border-r bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 transition-all duration-300 flex flex-col`}>
-          
+        <aside
+          className={`${
+            sidebarCollapsed ? 'w-16' : 'w-64'
+          } border-r bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 transition-all duration-300 flex flex-col`}
+        >
           {/* Main Navigation */}
           <nav className="flex-1 p-4 space-y-2">
             {navigationItems.map((item) => (
@@ -90,7 +99,9 @@ export function DashboardLayout() {
                 title={sidebarCollapsed ? item.name : undefined}
               >
                 <item.icon className="h-5 w-5 flex-shrink-0" />
-                {!sidebarCollapsed && <span className="font-medium">{item.name}</span>}
+                {!sidebarCollapsed && (
+                  <span className="font-medium">{item.name}</span>
+                )}
               </Link>
             ))}
           </nav>
@@ -107,7 +118,9 @@ export function DashboardLayout() {
               title={sidebarCollapsed ? 'Settings' : undefined}
             >
               <Settings className="h-5 w-5 flex-shrink-0" />
-              {!sidebarCollapsed && <span className="font-medium">Settings</span>}
+              {!sidebarCollapsed && (
+                <span className="font-medium">Settings</span>
+              )}
             </Link>
           </div>
 
@@ -119,7 +132,11 @@ export function DashboardLayout() {
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className={`w-full ${sidebarCollapsed ? 'px-2' : ''}`}
             >
-              {sidebarCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+              {sidebarCollapsed ? (
+                <Menu className="h-4 w-4" />
+              ) : (
+                <X className="h-4 w-4" />
+              )}
               {!sidebarCollapsed && <span className="ml-2">Collapse</span>}
             </Button>
           </div>
