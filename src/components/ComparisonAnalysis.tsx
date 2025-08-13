@@ -158,6 +158,7 @@ export function ComparisonAnalysis({
       a.href = url;
       a.download = `comparison_${activeTab}_${new Date().toISOString().split('T')[0]}.csv`;
       a.click();
+      URL.revokeObjectURL(url);
     }
   };
 
