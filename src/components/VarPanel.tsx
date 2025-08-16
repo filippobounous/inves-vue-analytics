@@ -1,139 +1,38 @@
-import { useCallback, useEffect, useState } from 'react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { AlertTriangle, Loader2, Shield } from 'lucide-react';
-import { investmentApi } from '@/services/api';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Activity, Loader2 } from 'lucide-react';
+
+interface ApiVarData {
+  date: string;
+  [key: string]: number | string;
+}
 
 interface VarPanelProps {
-  portfolioCodes: string[];
-  securityCodes: string[];
+  data: ApiVarData[];
+  selectedCodes: string[];
+  loading: boolean;
 }
 
-// Data structure returned by the VaR API
-interface ApiVarData {
-  code: string;
-  var_value: number;
-  confidence_level: number;
-  method: string;
-}
-
-type VarData = ApiVarData;
-
-export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
-  const [varData, setVarData] = useState<VarData[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Parameters
-  const [varWinSize, setVarWinSize] = useState(252);
-  const [confidenceLevel, setConfidenceLevel] = useState(0.95);
-  const [method, setMethod] = useState('historical');
-
-  const transformVarData = useCallback(
-    (apiData: ApiVarData[]): VarData[] => {
-      const allCodes = [...portfolioCodes, ...securityCodes];
-
-      const isValidData =
-        Array.isArray(apiData) &&
-        apiData.every(
-          (item) =>
-            typeof item.code === 'string' &&
-            typeof item.var_value === 'number' &&
-            typeof item.confidence_level === 'number' &&
-            typeof item.method === 'string',
-        );
-
-      if (!isValidData) {
-        return allCodes.map((code) => ({
-          code,
-          var_value: -(Math.random() * 0.15 + 0.02), // Negative VaR values
-          confidence_level: confidenceLevel,
-          method,
-        }));
-      }
-
-      return apiData;
-    },
-    [portfolioCodes, securityCodes, confidenceLevel, method],
-  );
-
-  const fetchVaR = useCallback(async () => {
-    if (portfolioCodes.length === 0 && securityCodes.length === 0) {
-      setVarData([]);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    const response = await investmentApi.getVaR({
-      portfolio_codes: portfolioCodes.length > 0 ? portfolioCodes : undefined,
-      security_codes: securityCodes.length > 0 ? securityCodes : undefined,
-      var_win_size: varWinSize,
-      confidence_level: confidenceLevel,
-      method,
-      local_only: true,
-    });
-
-    setLoading(false);
-
-    if (response.success && response.data) {
-      const transformedData = transformVarData(response.data);
-      setVarData(transformedData);
-    } else {
-      setError(response.error || 'Failed to fetch VaR data');
-    }
-  }, [
-    portfolioCodes,
-    securityCodes,
-    varWinSize,
-    confidenceLevel,
-    method,
-    transformVarData,
-  ]);
-
-  useEffect(() => {
-    fetchVaR();
-  }, [fetchVaR]);
-
-  const formatPercentage = (value: number) => {
+export function VarPanel({ data, selectedCodes, loading }: VarPanelProps) {
+  const formatPercent = (value: number) => {
     return `${(value * 100).toFixed(2)}%`;
   };
 
-  const getVarSeverity = (value: number) => {
-    const absValue = Math.abs(value);
-    if (absValue > 0.1) {
-      return {
-        color: 'text-destructive',
-        icon: AlertTriangle,
-        severity: 'High Risk',
-      };
-    }
-    if (absValue > 0.05) {
-      return {
-        color: 'text-warning',
-        icon: AlertTriangle,
-        severity: 'Medium Risk',
-      };
-    }
-    return { color: 'text-success', icon: Shield, severity: 'Low Risk' };
-  };
-
-  if (portfolioCodes.length === 0 && securityCodes.length === 0) {
+  if (selectedCodes.length === 0) {
     return (
-      <Card className="chart-container">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-primary" />
+            <Activity className="h-5 w-5 text-primary" />
             Value at Risk (VaR)
           </CardTitle>
         </CardHeader>
@@ -146,116 +45,77 @@ export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
     );
   }
 
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5 text-primary" />
+            Value at Risk (VaR)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Ensure data is an array before processing
+  const safeData = Array.isArray(data) ? data : [];
+  const latestData = safeData.length > 0 ? safeData[safeData.length - 1] : null;
+
   return (
-    <Card className="chart-container">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-primary" />
+          <Activity className="h-5 w-5 text-primary" />
           Value at Risk (VaR)
+          <Badge variant="secondary" className="text-xs">
+            95% Confidence
+          </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="varWinSize">Window Size</Label>
-            <Input
-              id="varWinSize"
-              type="number"
-              value={varWinSize}
-              onChange={(e) => setVarWinSize(Number(e.target.value))}
-              className="input-financial"
-              min="1"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confidenceLevel">Confidence Level</Label>
-            <Select
-              value={confidenceLevel.toString()}
-              onValueChange={(value) => setConfidenceLevel(Number(value))}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0.90">90%</SelectItem>
-                <SelectItem value="0.95">95%</SelectItem>
-                <SelectItem value="0.99">99%</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="method">Method</Label>
-            <Select value={method} onValueChange={setMethod}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="historical">Historical</SelectItem>
-                <SelectItem value="parametric">Parametric</SelectItem>
-                <SelectItem value="monte_carlo">Monte Carlo</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <Button onClick={fetchVaR} disabled={loading} className="w-full">
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Calculate VaR
-        </Button>
-
-        {error ? (
-          <div className="flex items-center justify-center h-64">
-            <p className="text-destructive">{error}</p>
-          </div>
+      <CardContent>
+        {latestData ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Entity</TableHead>
+                <TableHead>1-Day VaR</TableHead>
+                <TableHead>5-Day VaR</TableHead>
+                <TableHead>10-Day VaR</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {selectedCodes.map((code) => (
+                <TableRow key={code}>
+                  <TableCell className="font-medium">{code}</TableCell>
+                  <TableCell className="text-red-600">
+                    {typeof latestData[`${code}_1d`] === 'number' 
+                      ? formatPercent(latestData[`${code}_1d`] as number)
+                      : 'N/A'
+                    }
+                  </TableCell>
+                  <TableCell className="text-red-600">
+                    {typeof latestData[`${code}_5d`] === 'number' 
+                      ? formatPercent(latestData[`${code}_5d`] as number)
+                      : 'N/A'
+                    }
+                  </TableCell>
+                  <TableCell className="text-red-600">
+                    {typeof latestData[`${code}_10d`] === 'number' 
+                      ? formatPercent(latestData[`${code}_10d`] as number)
+                      : 'N/A'
+                    }
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {varData.map((data) => {
-              const severity = getVarSeverity(data.var_value);
-              const Icon = severity.icon;
-
-              return (
-                <Card key={data.code} className="metric-card">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-lg">{data.code}</h3>
-                      <div
-                        className={`flex items-center gap-1 ${severity.color}`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span className="text-xs">{severity.severity}</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">
-                          VaR ({Math.round(data.confidence_level * 100)}%)
-                        </span>
-                        <span
-                          className={`font-mono font-bold text-lg ${severity.color} financial-number`}
-                        >
-                          {formatPercentage(data.var_value)}
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-muted-foreground">
-                          Method
-                        </span>
-                        <span className="text-xs capitalize">
-                          {data.method}
-                        </span>
-                      </div>
-
-                      <div className="text-xs text-muted-foreground mt-3">
-                        Expected maximum loss with{' '}
-                        {Math.round(data.confidence_level * 100)}% confidence
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+          <div className="text-center text-muted-foreground py-8">
+            No VaR data available
           </div>
         )}
       </CardContent>
