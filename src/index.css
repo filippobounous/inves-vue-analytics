@@ -1,97 +1,92 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Investment Analytics Dashboard Design System */
+/* Professional Investment Analytics Design System */
 
 @layer base {
   :root {
-    /* Core background and foreground */
-    --background: 220 27% 8%;
-    --foreground: 220 15% 95%;
+    /* Core background and foreground - Neutral grays */
+    --background: 240 10% 5%;
+    --foreground: 240 10% 95%;
 
-    /* Card and surface colors */
-    --card: 220 25% 10%;
-    --card-foreground: 220 15% 95%;
+    /* Card and surface colors - Subtle elevation */
+    --card: 240 10% 8%;
+    --card-foreground: 240 10% 95%;
 
     /* Popover colors */
-    --popover: 220 27% 8%;
-    --popover-foreground: 220 15% 95%;
+    --popover: 240 10% 8%;
+    --popover-foreground: 240 10% 95%;
 
-    /* Primary brand colors - Deep blue/teal */
-    --primary: 195 85% 45%;
-    --primary-foreground: 220 15% 95%;
+    /* Primary brand colors - Professional blue */
+    --primary: 217 91% 60%;
+    --primary-foreground: 240 10% 95%;
 
-    /* Secondary colors */
-    --secondary: 220 20% 15%;
-    --secondary-foreground: 220 15% 85%;
+    /* Secondary colors - Muted backgrounds */
+    --secondary: 240 5% 15%;
+    --secondary-foreground: 240 10% 85%;
 
     /* Muted colors for subtle elements */
-    --muted: 220 20% 12%;
-    --muted-foreground: 220 10% 60%;
+    --muted: 240 5% 12%;
+    --muted-foreground: 240 5% 65%;
 
-    /* Accent colors - Financial gold */
-    --accent: 45 93% 55%;
-    --accent-foreground: 220 27% 8%;
+    /* Accent colors - Subtle green for success */
+    --accent: 142 70% 45%;
+    --accent-foreground: 240 10% 95%;
 
-    /* Destructive/error colors */
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 220 15% 95%;
+    /* Destructive/error colors - Professional red */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 240 10% 95%;
 
-    /* Success colors */
+    /* Success colors - Professional green */
     --success: 142 76% 36%;
-    --success-foreground: 220 15% 95%;
+    --success-foreground: 240 10% 95%;
 
-    /* Warning colors */
+    /* Warning colors - Professional amber */
     --warning: 38 92% 50%;
-    --warning-foreground: 220 27% 8%;
+    --warning-foreground: 240 10% 5%;
 
     /* Border and input colors */
-    --border: 220 20% 18%;
-    --input: 220 20% 15%;
-    --ring: 195 85% 45%;
+    --border: 240 6% 20%;
+    --input: 240 6% 15%;
+    --ring: 217 91% 60%;
 
     /* Chart colors for data visualization */
-    --chart-1: 195 85% 45%;
-    --chart-2: 45 93% 55%;
-    --chart-3: 142 76% 36%;
+    --chart-1: 217 91% 60%;
+    --chart-2: 142 76% 36%;
+    --chart-3: 38 92% 50%;
     --chart-4: 280 65% 55%;
     --chart-5: 25 95% 55%;
     --chart-6: 340 75% 55%;
 
-    /* Glass effect colors */
-    --glass-bg: 220 25% 10% / 0.7;
-    --glass-border: 220 20% 25% / 0.3;
-
-    --radius: 0.75rem;
+    --radius: 0.5rem;
   }
 
   .light {
-    --background: 220 15% 97%;
-    --foreground: 220 25% 8%;
-    --card: 220 10% 100%;
-    --card-foreground: 220 25% 8%;
-    --popover: 220 10% 100%;
-    --popover-foreground: 220 25% 8%;
-    --primary: 195 85% 35%;
-    --primary-foreground: 220 15% 95%;
-    --secondary: 220 10% 92%;
-    --secondary-foreground: 220 25% 15%;
-    --muted: 220 10% 95%;
-    --muted-foreground: 220 15% 40%;
-    --accent: 45 93% 45%;
-    --accent-foreground: 220 15% 95%;
-    --destructive: 0 75% 45%;
-    --destructive-foreground: 220 15% 95%;
+    --background: 240 10% 99%;
+    --foreground: 240 10% 5%;
+    --card: 240 10% 100%;
+    --card-foreground: 240 10% 5%;
+    --popover: 240 10% 100%;
+    --popover-foreground: 240 10% 5%;
+    --primary: 217 91% 45%;
+    --primary-foreground: 240 10% 95%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 15%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 5% 45%;
+    --accent: 142 70% 35%;
+    --accent-foreground: 240 10% 95%;
+    --destructive: 0 84% 50%;
+    --destructive-foreground: 240 10% 95%;
     --success: 142 76% 30%;
-    --success-foreground: 220 15% 95%;
+    --success-foreground: 240 10% 95%;
     --warning: 38 92% 40%;
-    --warning-foreground: 220 15% 95%;
-    --border: 220 15% 85%;
-    --input: 220 15% 90%;
-    --ring: 195 85% 35%;
-    --glass-bg: 220 10% 100% / 0.8;
-    --glass-border: 220 15% 85% / 0.5;
+    --warning-foreground: 240 10% 95%;
+    --border: 240 6% 88%;
+    --input: 240 6% 92%;
+    --ring: 217 91% 45%;
   }
 }
 
@@ -101,70 +96,30 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
-    font-feature-settings:
-      'rlig' 1,
-      'calt' 1;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 
-  /* Custom number formatting for financial data */
+  /* Professional number formatting */
   .financial-number {
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.025em;
   }
 
-  /* Glass morphism effect */
-  .glass {
-    background: hsl(var(--glass-bg));
-    border: 1px solid hsl(var(--glass-border));
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+  /* Subtle hover states */
+  .hover-lift {
+    transition: all 0.2s ease;
   }
 
-  /* Chart container styling */
-  .chart-container {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--card)) 0%,
-      hsl(var(--muted)) 100%
-    );
+  .hover-lift:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(var(--primary) / 0.15);
   }
 
-  /* Metric card styling */
-  .metric-card {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--card)) 0%,
-      hsl(var(--secondary)) 100%
-    );
-    border: 1px solid hsl(var(--border));
-    transition: all 0.3s ease;
-  }
-
-  .metric-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px hsl(var(--primary) / 0.15);
-  }
-
-  /* Loading animation */
-  .loading-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  @keyframes pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
-
-  /* Scroll styling */
+  /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
 
   ::-webkit-scrollbar-track {
@@ -173,7 +128,7 @@
 
   ::-webkit-scrollbar-thumb {
     background: hsl(var(--border));
-    border-radius: 3px;
+    border-radius: 2px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
@@ -181,52 +136,17 @@
   }
 }
 
-/* Custom component variants */
+/* Professional component variants */
 @layer components {
-  .btn-hero {
-    @apply bg-gradient-to-r from-primary to-accent text-primary-foreground hover:from-primary/90 hover:to-accent/90 font-semibold px-6 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl;
+  .metric-card {
+    @apply bg-card border border-border/50 transition-all duration-200 hover-lift;
   }
 
-  .btn-secondary {
-    @apply bg-secondary/50 text-secondary-foreground hover:bg-secondary/70 border border-border;
+  .nav-item {
+    @apply transition-colors duration-150;
   }
 
-  .input-financial {
-    @apply bg-input/50 border-border focus:border-primary focus:ring-1 focus:ring-primary/20 financial-number;
-  }
-
-  .card-elevated {
-    @apply bg-card/80 border border-border/50 backdrop-blur-sm hover:bg-card/90 transition-all duration-300;
-  }
-
-  .text-success {
-    @apply text-green-400;
-  }
-
-  .text-error {
-    @apply text-red-400;
-  }
-
-  .text-warning {
-    @apply text-amber-400;
-  }
-
-  .text-chart-1 {
-    @apply text-blue-400;
-  }
-  .text-chart-2 {
-    @apply text-amber-400;
-  }
-  .text-chart-3 {
-    @apply text-green-400;
-  }
-  .text-chart-4 {
-    @apply text-purple-400;
-  }
-  .text-chart-5 {
-    @apply text-orange-400;
-  }
-  .text-chart-6 {
-    @apply text-pink-400;
+  .professional-input {
+    @apply bg-input/50 border-border focus:border-primary focus:ring-1 focus:ring-primary/20;
   }
 }

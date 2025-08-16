@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, Link } from 'react-router-dom';
 import {
   LayoutDashboard,
   BarChart3,
@@ -9,16 +9,15 @@ import {
   Shuffle,
   Settings,
   Menu,
-  X,
   Search,
   Bell,
   Calendar,
-  DollarSign,
   AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -40,7 +39,6 @@ const navigationItems = [
 
 export function DashboardLayout() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { useTestData } = useSettings();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [globalCurrency, setGlobalCurrency] = useState('USD');
@@ -63,43 +61,42 @@ export function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex h-16 items-center justify-between px-6">
-          {/* Left Section */}
-          <div className="flex items-center gap-4">
+      {/* Professional Top Bar */}
+      <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+        <div className="flex h-14 items-center justify-between px-6">
+          {/* Left Section - Branding & Navigation */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded bg-primary flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-sm font-semibold tracking-tight">Investment Analytics</h1>
+                <p className="text-xs text-muted-foreground">{getBreadcrumbs()}</p>
+              </div>
+            </div>
+            
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="lg:hidden"
-              aria-label="Toggle navigation"
+              className="h-8 w-8"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4" />
             </Button>
-            
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <BarChart3 className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-lg font-semibold">Investment Analytics</h1>
-                <p className="text-xs text-muted-foreground">{getBreadcrumbs()}</p>
-              </div>
-            </div>
           </div>
 
-          {/* Center Section */}
+          {/* Center Section - Controls */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <Button variant="outline" size="sm">
-                Last 1Y
+              <Button variant="outline" size="sm" className="h-8 text-xs">
+                Last 12M
               </Button>
             </div>
             
             <Select value={globalCurrency} onValueChange={setGlobalCurrency}>
-              <SelectTrigger className="w-20">
+              <SelectTrigger className="w-16 h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -111,31 +108,29 @@ export function DashboardLayout() {
             </Select>
 
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search..."
-                className="w-64 pl-9"
+                className="w-48 h-8 pl-8 text-xs"
               />
             </div>
           </div>
 
-          {/* Right Section */}
-          <div className="flex items-center gap-4">
+          {/* Right Section - Status & Actions */}
+          <div className="flex items-center gap-3">
             {useTestData && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                <span className="text-sm text-amber-700 dark:text-amber-300">
-                  Test Data Mode
-                </span>
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-warning/10 border border-warning/20 rounded text-xs">
+                <AlertTriangle className="h-3 w-3 text-warning" />
+                <span className="text-warning font-medium">Test Mode</span>
               </div>
             )}
             
-            <div className="text-sm text-muted-foreground">
-              Last Updated: {new Date().toLocaleTimeString()}
+            <div className="text-xs text-muted-foreground">
+              Updated: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
             
-            <Button variant="ghost" size="icon">
-              <Bell className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Bell className="h-3.5 w-3.5" />
             </Button>
             
             <ThemeToggle />
@@ -144,79 +139,77 @@ export function DashboardLayout() {
       </header>
 
       <div className="flex">
-        {/* Sidebar */}
+        {/* Professional Sidebar */}
         <aside
           className={cn(
-            'sticky top-16 h-[calc(100vh-4rem)] border-r bg-background/95 backdrop-blur transition-all duration-300 flex flex-col',
-            sidebarCollapsed ? 'w-16' : 'w-64'
+            'sticky top-14 h-[calc(100vh-3.5rem)] border-r bg-card transition-all duration-200 flex flex-col',
+            sidebarCollapsed ? 'w-14' : 'w-56'
           )}
         >
           {/* Main Navigation */}
-          <nav className="flex-1 p-4 space-y-2">
+          <nav className="flex-1 p-3 space-y-1">
             {navigationItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
+                  'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   isActive(item.href)
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent',
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
                   sidebarCollapsed ? 'justify-center' : ''
                 )}
                 title={sidebarCollapsed ? item.name : undefined}
               >
-                <item.icon className="h-5 w-5 flex-shrink-0" />
-                {!sidebarCollapsed && (
-                  <span className="font-medium">{item.name}</span>
-                )}
+                <item.icon className="h-4 w-4 flex-shrink-0" />
+                {!sidebarCollapsed && <span>{item.name}</span>}
               </Link>
             ))}
           </nav>
 
           {/* Settings at bottom */}
-          <div className="p-4 border-t">
+          <div className="p-3 border-t">
             <Link
               to="/dashboard/settings"
               className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
+                'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                 location.pathname === '/dashboard/settings'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent',
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
                 sidebarCollapsed ? 'justify-center' : ''
               )}
               title={sidebarCollapsed ? 'Settings' : undefined}
             >
-              <Settings className="h-5 w-5 flex-shrink-0" />
-              {!sidebarCollapsed && (
-                <span className="font-medium">Settings</span>
-              )}
+              <Settings className="h-4 w-4 flex-shrink-0" />
+              {!sidebarCollapsed && <span>Settings</span>}
             </Link>
           </div>
 
-          {/* Collapse Toggle (Desktop only) */}
-          <div className="hidden lg:block p-4 border-t">
+          {/* Collapse Toggle */}
+          <div className="p-3 border-t">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className={cn('w-full', sidebarCollapsed ? 'px-2' : '')}
+              className={cn('w-full h-8 text-xs', sidebarCollapsed ? 'px-2' : '')}
             >
               {sidebarCollapsed ? (
-                <Menu className="h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5" />
               ) : (
                 <>
-                  <X className="h-4 w-4" />
-                  <span className="ml-2">Collapse</span>
+                  <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+                  Collapse
                 </>
               )}
             </Button>
           </div>
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 p-6 overflow-auto">
-          <Outlet />
+        {/* Main Content Area */}
+        <main className="flex-1 bg-background">
+          <div className="p-6">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
