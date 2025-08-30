@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +13,7 @@ import {
 import { Plus, Search, Building, TrendingUp } from 'lucide-react';
 import { investmentApi } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useSettings } from '@/hooks/use-settings';
 import { SelectedEntitiesList } from './SelectedEntitiesList';
 import {
   TEST_PORTFOLIOS,
@@ -169,11 +168,17 @@ export function EntitySelector({ onSelectionChange }: EntitySelectorProps) {
         <CardContent>
           <Tabs defaultValue="portfolios" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="portfolios" className="flex items-center gap-2">
+              <TabsTrigger
+                value="portfolios"
+                className="flex items-center gap-2"
+              >
                 <Building className="h-4 w-4" />
                 Portfolios
               </TabsTrigger>
-              <TabsTrigger value="securities" className="flex items-center gap-2">
+              <TabsTrigger
+                value="securities"
+                className="flex items-center gap-2"
+              >
                 <TrendingUp className="h-4 w-4" />
                 Securities
               </TabsTrigger>

@@ -1,10 +1,9 @@
-
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useSettings } from '@/hooks/use-settings';
 import { Settings as SettingsIcon, ArrowLeft } from 'lucide-react';
 
 const Settings = () => {
@@ -48,7 +47,8 @@ const Settings = () => {
             <div className="space-y-0.5">
               <Label htmlFor="test-data">Use Test Data</Label>
               <div className="text-sm text-muted-foreground">
-                Toggle between test data and real API data for development and testing
+                Toggle between test data and real API data for development and
+                testing
               </div>
             </div>
             <Switch

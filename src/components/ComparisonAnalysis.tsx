@@ -15,7 +15,7 @@ import { PriceChart } from './PriceChart';
 import { ReturnsChart } from './ReturnsChart';
 import { VolatilityChart } from './VolatilityChart';
 import { investmentApi } from '@/services/api';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useSettings } from '@/hooks/use-settings';
 import {
   generateMockPriceData,
   generateMockReturnsData,
