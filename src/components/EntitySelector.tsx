@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -158,11 +157,6 @@ export function EntitySelector({ onSelectionChange }: EntitySelectorProps) {
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5 text-muted-foreground" />
             Entity Selection
-            {useTestData && (
-              <Badge variant="secondary" className="text-xs">
-                Test Mode
-              </Badge>
-            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
