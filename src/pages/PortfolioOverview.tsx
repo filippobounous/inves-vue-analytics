@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
@@ -148,16 +147,7 @@ export function PortfolioOverview() {
             Comprehensive view of your investment holdings and performance
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {useTestData && (
-            <div className="flex items-center gap-2 px-3 py-1 bg-amber-100 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg">
-              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-              <span className="text-sm text-amber-700 dark:text-amber-300">
-                Test Data Mode Active
-              </span>
-            </div>
-          )}
-        </div>
+        <div className="flex items-center gap-2"></div>
       </div>
 
       {/* View Toggle */}
