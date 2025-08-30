@@ -1,13 +1,9 @@
-
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X, Building, TrendingUp } from 'lucide-react';
-import {
-  TEST_PORTFOLIOS,
-  TEST_SECURITIES,
-} from '@/services/testData';
-import { useSettings } from '@/contexts/SettingsContext';
+import { TEST_PORTFOLIOS, TEST_SECURITIES } from '@/services/testData';
+import { useSettings } from '@/hooks/use-settings';
 
 interface SelectedEntitiesListProps {
   selectedPortfolios: string[];

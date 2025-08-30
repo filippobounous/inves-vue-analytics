@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Outlet, useLocation, Link } from 'react-router-dom';
 import {
@@ -26,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useSettings } from '@/hooks/use-settings';
 import { cn } from '@/lib/utils';
 
 const navigationItems = [
@@ -44,8 +43,10 @@ export function DashboardLayout() {
   const [globalCurrency, setGlobalCurrency] = useState('USD');
 
   const isActive = (href: string) => {
-    return location.pathname === href || 
-           (href === '/dashboard' && location.pathname === '/dashboard');
+    return (
+      location.pathname === href ||
+      (href === '/dashboard' && location.pathname === '/dashboard')
+    );
   };
 
   const getBreadcrumbs = () => {
@@ -71,11 +72,15 @@ export function DashboardLayout() {
                 <BarChart3 className="h-4 w-4 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-sm font-semibold tracking-tight">Investment Analytics</h1>
-                <p className="text-xs text-muted-foreground">{getBreadcrumbs()}</p>
+                <h1 className="text-sm font-semibold tracking-tight">
+                  Investment Analytics
+                </h1>
+                <p className="text-xs text-muted-foreground">
+                  {getBreadcrumbs()}
+                </p>
               </div>
             </div>
-            
+
             <Button
               variant="ghost"
               size="icon"
@@ -94,7 +99,7 @@ export function DashboardLayout() {
                 Last 12M
               </Button>
             </div>
-            
+
             <Select value={globalCurrency} onValueChange={setGlobalCurrency}>
               <SelectTrigger className="w-16 h-8 text-xs">
                 <SelectValue />
@@ -124,15 +129,19 @@ export function DashboardLayout() {
                 <span className="text-warning font-medium">Test Mode</span>
               </div>
             )}
-            
+
             <div className="text-xs text-muted-foreground">
-              Updated: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              Updated:{' '}
+              {new Date().toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
             </div>
-            
+
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <Bell className="h-3.5 w-3.5" />
             </Button>
-            
+
             <ThemeToggle />
           </div>
         </div>
@@ -143,7 +152,7 @@ export function DashboardLayout() {
         <aside
           className={cn(
             'sticky top-14 h-[calc(100vh-3.5rem)] border-r bg-card transition-all duration-200 flex flex-col',
-            sidebarCollapsed ? 'w-14' : 'w-56'
+            sidebarCollapsed ? 'w-14' : 'w-56',
           )}
         >
           {/* Main Navigation */}
@@ -157,7 +166,7 @@ export function DashboardLayout() {
                   isActive(item.href)
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
-                  sidebarCollapsed ? 'justify-center' : ''
+                  sidebarCollapsed ? 'justify-center' : '',
                 )}
                 title={sidebarCollapsed ? item.name : undefined}
               >
@@ -176,7 +185,7 @@ export function DashboardLayout() {
                 location.pathname === '/dashboard/settings'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
-                sidebarCollapsed ? 'justify-center' : ''
+                sidebarCollapsed ? 'justify-center' : '',
               )}
               title={sidebarCollapsed ? 'Settings' : undefined}
             >
@@ -191,7 +200,10 @@ export function DashboardLayout() {
               variant="ghost"
               size="sm"
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className={cn('w-full h-8 text-xs', sidebarCollapsed ? 'px-2' : '')}
+              className={cn(
+                'w-full h-8 text-xs',
+                sidebarCollapsed ? 'px-2' : '',
+              )}
             >
               {sidebarCollapsed ? (
                 <ChevronRight className="h-3.5 w-3.5" />

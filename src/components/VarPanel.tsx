@@ -1,4 +1,4 @@
-
+import { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -10,6 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Activity, Loader2 } from 'lucide-react';
+import { investmentApi } from '@/services/api';
 
 interface ApiVarData {
   date: string;
@@ -17,12 +18,40 @@ interface ApiVarData {
 }
 
 interface VarPanelProps {
-  data: ApiVarData[];
-  selectedCodes: string[];
-  loading: boolean;
+  portfolioCodes: string[];
+  securityCodes: string[];
 }
 
-export function VarPanel({ data, selectedCodes, loading }: VarPanelProps) {
+export function VarPanel({ portfolioCodes, securityCodes }: VarPanelProps) {
+  const [data, setData] = useState<ApiVarData[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const selectedCodes = [...portfolioCodes, ...securityCodes];
+
+  const fetchVarData = useCallback(async () => {
+    if (selectedCodes.length === 0) {
+      setData([]);
+      return;
+    }
+
+    setLoading(true);
+    const response = await investmentApi.getVaR({
+      portfolio_codes: portfolioCodes.length > 0 ? portfolioCodes : undefined,
+      security_codes: securityCodes.length > 0 ? securityCodes : undefined,
+      local_only: true,
+    });
+    setLoading(false);
+
+    if (response.success && Array.isArray(response.data)) {
+      setData(response.data);
+    } else {
+      setData([]);
+    }
+  }, [portfolioCodes, securityCodes, selectedCodes.length]);
+
+  useEffect(() => {
+    fetchVarData();
+  }, [fetchVarData]);
   const formatPercent = (value: number) => {
     return `${(value * 100).toFixed(2)}%`;
   };
@@ -92,22 +121,19 @@ export function VarPanel({ data, selectedCodes, loading }: VarPanelProps) {
                 <TableRow key={code}>
                   <TableCell className="font-medium">{code}</TableCell>
                   <TableCell className="text-red-600">
-                    {typeof latestData[`${code}_1d`] === 'number' 
+                    {typeof latestData[`${code}_1d`] === 'number'
                       ? formatPercent(latestData[`${code}_1d`] as number)
-                      : 'N/A'
-                    }
+                      : 'N/A'}
                   </TableCell>
                   <TableCell className="text-red-600">
-                    {typeof latestData[`${code}_5d`] === 'number' 
+                    {typeof latestData[`${code}_5d`] === 'number'
                       ? formatPercent(latestData[`${code}_5d`] as number)
-                      : 'N/A'
-                    }
+                      : 'N/A'}
                   </TableCell>
                   <TableCell className="text-red-600">
-                    {typeof latestData[`${code}_10d`] === 'number' 
+                    {typeof latestData[`${code}_10d`] === 'number'
                       ? formatPercent(latestData[`${code}_10d`] as number)
-                      : 'N/A'
-                    }
+                      : 'N/A'}
                   </TableCell>
                 </TableRow>
               ))}
